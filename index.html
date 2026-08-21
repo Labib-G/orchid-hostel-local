@@ -628,7 +628,7 @@ function monthTotals(mk = monthKey()){
   return { totalDue, collected, outstanding: Math.max(0, totalDue-collected) };
 }
 function progressRingSVG({collected, totalDue, currency, size=152}){
-  const r = size/2 - 12, c = 2*Math.PI*r, cx = size/2, cy = size/2;
+  const r = size/2 - 8, c = 2*Math.PI*r, cx = size/2, cy = size/2;
   const pct = totalDue>0 ? Math.min(1, collected/totalDue) : (collected>0 ? 1 : 0);
   const offset = c * (1-pct);
   return `
@@ -666,7 +666,7 @@ function renderDashboard(){
         <div class="big-num">${esc(cur)}${fmtMoney(totalDue)}</div>
         <div style="${prevOutstanding>0 ? 'font-size:13px; margin-top:4px;' : 'font-size:16px; margin-top:auto;'} color:#fff; font-family:var(--font-mono);">${prevOutstanding>0 ? `<div style="font-size:15px; margin-top:2px; color:#fff;">${esc(cur)}${fmtMoney(prevOutstanding)}</div><div style="font-size:12px; margin-top:1px; letter-spacing:.06em; color:#fff;">PREVIOUS DUES</div>` : 'NO PREVIOUS DUES'}</div>
       </div>
-      <div class="stat-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:6px 6px;">
+      <div class="stat-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4px 4px;">
         <div class="eyebrow" style="align-self:flex-start; font-weight:700;">Money received</div>
         ${progressRingSVG({collected:totals.collected, totalDue:totals.totalDue, currency:cur, size:132})}
       </div>
