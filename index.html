@@ -1188,23 +1188,33 @@ async function ensureSingleRooms(){
     }
   }
 }
+const SINGLE_ROOM_RENT = { 3:1500, 6:1500, 32:1500, 33:1500, 37:1000, 38:1000 };
+function defaultRentForRoom(room){
+  const rn = parseInt(room, 10);
+  if (SINGLE_ROOM_RENT[rn] != null) return SINGLE_ROOM_RENT[rn];
+  const c = state.seats.filter(s=>s.room===room).length;
+  return (c===2 || c===3) ? 1000 : 0;
+}
 async function applyDefaultRents(){
-  // Double (2-seat) and triple (3-seat) rooms have a default rent of 1000 per occupant.
-  // Only fills it in when a resident has no rent set yet, so manually edited rents are kept.
+  // Single rooms use room-specific rent (see SINGLE_ROOM_RENT); double/triple rooms are 1000
+  // per occupant. Only fills it in when a resident has no rent set yet, so manually edited
+  // rents are kept.
   for (const r of state.residents){
     if (r.deletedAt) continue;
     const seat = residentSeat(r.id);
     if (!seat) continue;
-    const c = state.seats.filter(s=>s.room===seat.room).length;
-    if ((c===2 || c===3) && !r.monthlyRent){
-      r.monthlyRent = 1000;
+    const rn = parseInt(seat.room, 10);
+    let rent;
+    if (SINGLE_ROOM_RENT[rn] != null) rent = SINGLE_ROOM_RENT[rn];
+    else {
+      const c = state.seats.filter(s=>s.room===seat.room).length;
+      rent = (c===2 || c===3) ? 1000 : 0;
+    }
+    if (rent && !r.monthlyRent){
+      r.monthlyRent = rent;
       await DB.saveResident(r);
     }
   }
-}
-function defaultRentForRoom(room){
-  const c = state.seats.filter(s=>s.room===room).length;
-  return (c===2 || c===3) ? 1000 : 0;
 }
 async function addRoom(room, count, floor='', bedType=''){
   const existing = state.seats.filter(s=>s.room===room).length;
