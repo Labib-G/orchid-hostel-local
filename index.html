@@ -678,10 +678,8 @@ function progressRingSVG({collected, totalDue, currency, size=152}){
       <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--orchid)" stroke-width="12"
         stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}"
         transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dashoffset .4s ease;"/>
-      <text x="${cx}" y="${cy-4}" text-anchor="middle" font-family="'Space Grotesk','Inter',sans-serif" font-weight="700"
-        font-size="${size*0.145}" fill="var(--ink)">${esc(currency)}${fmtMoney(collected)}</text>
-      <text x="${cx}" y="${cy+18}" text-anchor="middle" font-family="'Space Grotesk','Inter',sans-serif"
-        font-size="${size*0.06}" fill="var(--ink-soft)">received</text>
+      <text x="${cx}" y="${cy+5}" text-anchor="middle" font-family="'Space Grotesk','Inter',sans-serif" font-weight="700"
+        font-size="${size*0.16}" fill="var(--ink)">${esc(currency)}${fmtMoney(collected)}</text>
     </svg>`;
 }
 
@@ -704,9 +702,9 @@ function renderDashboard(){
         <div class="eyebrow">Total due</div>
         <div class="big-num">${esc(cur)}${fmtMoney(totalDue)}</div>
       </div>
-      <div class="stat-card">
-        <div class="eyebrow">Occupancy</div>
-        <div class="big-num">${seatsTotal ? Math.round(seatsOccupied/seatsTotal*100) : 0}<span class="faint" style="font-size:15px;">%</span></div>
+      <div class="stat-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px 8px;">
+        <div class="eyebrow" style="align-self:flex-start;">Money received</div>
+        ${progressRingSVG({collected:totals.collected, totalDue:totals.totalDue, currency:cur, size:106})}
       </div>
       <div class="stat-card">
         <div class="eyebrow">Seats empty</div>
@@ -715,14 +713,6 @@ function renderDashboard(){
       <div class="stat-card">
         <div class="eyebrow">Residents</div>
         <div class="big-num">${seatsOccupied}<span class="faint" style="font-size:15px;">/${seatsTotal}</span></div>
-      </div>
-    </div>
-
-    <div class="card" style="display:flex; flex-direction:column; align-items:center; padding:20px 16px;">
-      <div class="eyebrow" style="align-self:flex-start; margin-bottom:6px;">Money received this cycle</div>
-      ${progressRingSVG({collected:totals.collected, totalDue:totals.totalDue, currency:cur})}
-      <div class="muted" style="font-size:12.5px; margin-top:8px;">
-        ${totals.totalDue>0 ? `of ${esc(cur)}${fmtMoney(totals.totalDue)} expected this month` : 'No dues generated yet this month'}
       </div>
     </div>
 
