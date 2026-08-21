@@ -705,7 +705,7 @@ function renderDashboard(){
       <div class="stat-card accent-orchid">
         <div class="eyebrow">Total due</div>
         <div class="big-num">${esc(cur)}${fmtMoney(totalDue)}</div>
-        <div style="font-size:11.5px; margin-top:3px; color:rgba(255,255,255,.85);">${prevOutstanding>0 ? `${esc(cur)}${fmtMoney(prevOutstanding)} from prev. months` : 'No prev. dues'}</div>
+        <div style="font-size:13px; margin-top:4px; color:rgba(255,255,255,.9);">${prevOutstanding>0 ? `Prev. months: ${esc(cur)}${fmtMoney(prevOutstanding)}` : 'No prev. dues'}</div>
       </div>
       <div class="stat-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px 8px;">
         <div class="eyebrow" style="align-self:flex-start;">Money received</div>
