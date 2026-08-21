@@ -175,7 +175,7 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
 .muted{color:var(--ink-soft);}
 .faint{color:var(--ink-faint);}
 .mono{font-family:var(--font-mono); font-variant-numeric:tabular-nums;}
-.big-num{font-family:var(--font-display); font-size:34px; font-weight:700; line-height:1;}
+.big-num{font-family:'Space Grotesk','Inter',sans-serif; font-size:34px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums;}
 
 /* ============ CARDS / SECTIONS ============ */
 .section-title{display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 10px;}
@@ -678,7 +678,7 @@ function progressRingSVG({collected, totalDue, currency, size=152}){
       <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--orchid)" stroke-width="12"
         stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}"
         transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dashoffset .4s ease;"/>
-      <text x="${cx}" y="${cy-4}" text-anchor="middle" font-family="'Fraunces',serif" font-weight="700"
+      <text x="${cx}" y="${cy-4}" text-anchor="middle" font-family="'Space Grotesk','Inter',sans-serif" font-weight="700"
         font-size="${size*0.145}" fill="var(--ink)">${esc(currency)}${fmtMoney(collected)}</text>
       <text x="${cx}" y="${cy+18}" text-anchor="middle" font-family="'Space Grotesk','Inter',sans-serif"
         font-size="${size*0.06}" fill="var(--ink-soft)">received</text>
