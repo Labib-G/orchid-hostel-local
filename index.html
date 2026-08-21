@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <title>Orchid Hostel</title>
-<meta name="theme-color" content="#A6337B" />
+<meta name="theme-color" content="#10B981" />
 <meta name="description" content="Seats, residents, dues and voice-controlled records for Orchid Hostel" />
 <link rel="manifest" href="./manifest.json" />
 <link rel="icon" href="./icon-192.png" />
@@ -31,11 +31,11 @@
   --ink:#241B2C;
   --ink-soft:#6B5D71;
   --ink-faint:#A99CAC;
-  --orchid:#A6337B;
-  --orchid-deep:#7A2560;
-  --orchid-fg:#A6337B;
-  --orchid-rgb:166,51,123;
-  --orchid-tint:#F3E1EC;
+  --orchid:#059669;
+  --orchid-deep:#047857;
+  --orchid-fg:#047857;
+  --orchid-rgb:5,150,105;
+  --orchid-tint:#D1FAE5;
   --gold:#B8862B;
   --gold-tint:#F6ECD5;
   --green:#3F7A54;
@@ -60,11 +60,11 @@
   --ink:#F3ECE7;
   --ink-soft:#B6A9BE;
   --ink-faint:#75687F;
-  --orchid:#BD4F8F;
-  --orchid-deep:#7A2560;
-  --orchid-fg:#E9A0CB;
-  --orchid-rgb:189,79,143;
-  --orchid-tint:#3A1F30;
+  --orchid:#34D399;
+  --orchid-deep:#047857;
+  --orchid-fg:#6EE7B7;
+  --orchid-rgb:52,211,153;
+  --orchid-tint:#064E3B;
   --gold:#E3B65C;
   --gold-tint:#3A2F17;
   --green:#71C088;
@@ -78,7 +78,7 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]):not([data-theme="dark"]){
     --paper:#1B1620; --paper-alt:#251F2C; --card:#251F2C; --ink:#F3ECE7; --ink-soft:#B6A9BE; --ink-faint:#75687F;
-    --orchid:#BD4F8F; --orchid-deep:#7A2560; --orchid-fg:#E9A0CB; --orchid-rgb:189,79,143; --orchid-tint:#3A1F30;
+    --orchid:#34D399; --orchid-deep:#047857; --orchid-fg:#6EE7B7; --orchid-rgb:52,211,153; --orchid-tint:#064E3B;
     --gold:#E3B65C; --gold-tint:#3A2F17; --green:#71C088; --green-tint:#1E3324; --rust:#E58B70; --rust-tint:#3B2119;
     --border:#3A3242; --shadow:0 8px 24px -12px rgba(0,0,0,.6); --outer-bg:#0E0B12;
   }
@@ -155,16 +155,16 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
   position:fixed; z-index:30; right:calc(50% - 240px + 18px); bottom:78px;
   width:58px;height:58px;border-radius:50%;border:none;
   background:linear-gradient(155deg,var(--orchid),var(--orchid-deep));
-  color:#fff; box-shadow:0 10px 24px -8px rgba(122,37,96,.55);
+  color:#fff; box-shadow:0 10px 24px -8px rgba(4,120,87,.55);
   display:flex;align-items:center;justify-content:center;
 }
 .mic-btn svg{width:24px;height:24px;}
 @media (max-width:520px){ .mic-btn{ right:20px; } }
 .mic-btn.listening{animation:pulse 1.4s ease-in-out infinite;}
 @keyframes pulse{
-  0%{box-shadow:0 0 0 0 rgba(var(--orchid-rgb),.5),0 10px 24px -8px rgba(122,37,96,.55);}
-  70%{box-shadow:0 0 0 16px rgba(var(--orchid-rgb),0),0 10px 24px -8px rgba(122,37,96,.55);}
-  100%{box-shadow:0 0 0 0 rgba(var(--orchid-rgb),0),0 10px 24px -8px rgba(122,37,96,.55);}
+  0%{box-shadow:0 0 0 0 rgba(var(--orchid-rgb),.5),0 10px 24px -8px rgba(4,120,87,.55);}
+  70%{box-shadow:0 0 0 16px rgba(var(--orchid-rgb),0),0 10px 24px -8px rgba(4,120,87,.55);}
+  100%{box-shadow:0 0 0 0 rgba(var(--orchid-rgb),0),0 10px 24px -8px rgba(4,120,87,.55);}
 }
 
 /* ============ TYPE HELPERS ============ */
@@ -377,7 +377,7 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
 <div id="app" class="app-frame hidden">
   <header class="topbar">
     <div class="brand">
-      <svg class="brand-mark" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" fill="#A6337B"/><path d="M13 6c1.2 1.6 1.2 3.4 0 5-1.2-1.6-1.2-3.4 0-5Z" fill="#F6D97A"/><path d="M13 21c-1.2-1.6-1.2-3.4 0-5 1.2 1.6 1.2 3.4 0 5Z" fill="#F6D97A"/><path d="M6 13c1.6-1.2 3.4-1.2 5 0-1.6 1.2-3.4 1.2-5 0Z" fill="#F6D97A"/><path d="M20 13c-1.6 1.2-3.4 1.2-5 0 1.6-1.2 3.4-1.2 5 0Z" fill="#F6D97A"/><circle cx="13" cy="13" r="2.1" fill="#FBF7F5"/></svg>
+      <svg class="brand-mark" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" fill="#10B981"/><path d="M13 6c1.2 1.6 1.2 3.4 0 5-1.2-1.6-1.2-3.4 0-5Z" fill="#F6D97A"/><path d="M13 21c-1.2-1.6-1.2-3.4 0-5 1.2 1.6 1.2 3.4 0 5Z" fill="#F6D97A"/><path d="M6 13c1.6-1.2 3.4-1.2 5 0-1.6 1.2-3.4 1.2-5 0Z" fill="#F6D97A"/><path d="M20 13c-1.6 1.2-3.4 1.2-5 0 1.6-1.2 3.4-1.2 5 0Z" fill="#F6D97A"/><circle cx="13" cy="13" r="2.1" fill="#FBF7F5"/></svg>
       <span class="brand-name" id="brand-name">Orchid Hostel</span>
     </div>
     <div class="topbar-actions">
@@ -472,7 +472,7 @@ function applyTheme(){
   const icon = $('#theme-icon');
   if (icon) icon.innerHTML = eff==='dark' ? MOON_PATH : SUN_PATH;
   const metaTheme = document.querySelector('meta[name="theme-color"]');
-  if (metaTheme) metaTheme.setAttribute('content', eff==='dark' ? '#1B1620' : '#A6337B');
+  if (metaTheme) metaTheme.setAttribute('content', eff==='dark' ? '#1B1620' : '#10B981');
 }
 function toggleTheme(){
   const eff = effectiveTheme(lsGet(LS.theme, 'dark'));
