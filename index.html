@@ -610,6 +610,7 @@ async function loadAll(){
     state.seats = await DB.listSeats();
   }
   await ensureSingleRooms();
+  await applyDefaultRents();
   await purgeExpiredTrash();
 }
 
@@ -1187,6 +1188,24 @@ async function ensureSingleRooms(){
     }
   }
 }
+async function applyDefaultRents(){
+  // Double (2-seat) and triple (3-seat) rooms have a default rent of 1000 per occupant.
+  // Only fills it in when a resident has no rent set yet, so manually edited rents are kept.
+  for (const r of state.residents){
+    if (r.deletedAt) continue;
+    const seat = residentSeat(r.id);
+    if (!seat) continue;
+    const c = state.seats.filter(s=>s.room===seat.room).length;
+    if ((c===2 || c===3) && !r.monthlyRent){
+      r.monthlyRent = 1000;
+      await DB.saveResident(r);
+    }
+  }
+}
+function defaultRentForRoom(room){
+  const c = state.seats.filter(s=>s.room===room).length;
+  return (c===2 || c===3) ? 1000 : 0;
+}
 async function addRoom(room, count, floor='', bedType=''){
   const existing = state.seats.filter(s=>s.room===room).length;
   for (let i=1;i<=count;i++){
@@ -1291,7 +1310,14 @@ function bindViewEvents(){
       const editing = state._openId ? state.residents.find(x=>x.id===state._openId) : null;
       const curSeat = editing ? residentSeat(editing.id) : null;
       populateSeatSelect(rfRoom.value, state._openId, curSeat?.seatLabel);
-      rfRoom.addEventListener('change', () => populateSeatSelect(rfRoom.value, state._openId, null));
+      rfRoom.addEventListener('change', () => {
+        populateSeatSelect(rfRoom.value, state._openId, null);
+        const rentInput = rf.querySelector('input[name="monthlyRent"]');
+        if (rentInput && !rentInput.value){
+          const dr = defaultRentForRoom(rfRoom.value);
+          if (dr) rentInput.value = dr;
+        }
+      });
     }
     bindPendingAttButtons();
     $('#rf-att-input')?.addEventListener('change', async (e) => {
