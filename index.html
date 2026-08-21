@@ -652,7 +652,12 @@ function renderDashboard(){
   const seatsOccupied = state.seats.filter(s=>s.residentId).length;
   const seatsEmpty = seatsTotal - seatsOccupied;
   const active = visibleResidents().filter(r=>r.status!=='left');
-  const dueList = active.filter(r => residentDueStatus(r.id) !== 'paid');
+  const dueList = active.filter(r => residentDueStatus(r.id) !== 'paid').sort((a,b)=>{
+    const pa = currentMonthPayment(a.id), pb = currentMonthPayment(b.id);
+    const oa = pa ? Math.max(0,(pa.amountDue||0)-(pa.amountPaid||0)) : (a.monthlyRent||0);
+    const ob = pb ? Math.max(0,(pb.amountDue||0)-(pb.amountPaid||0)) : (b.monthlyRent||0);
+    return ob - oa;
+  });
   const totalDue = totalDueAmount(mk);
   const cur = state.settings.currency;
   const totals = monthTotals(mk);
@@ -683,9 +688,9 @@ function renderDashboard(){
       </div>
     </div>
 
-    <div class="section-title"><h2>Residents with dues</h2><button class="link-btn" data-nav="dues">See all</button></div>
+    <div class="section-title"><h2>Residents with dues</h2>${dueList.length > 3 ? `<button class="link-btn" data-nav="dues">See all</button>` : ''}</div>
     ${dueList.length===0 ? emptyState('check','All caught up','No pending dues this month.') :
-      `<div class="card" style="padding:4px 12px;">${dueList.slice(0,5).map(r=>residentRow(r)).join('')}</div>`}
+      `<div class="card" style="padding:4px 12px;">${dueList.slice(0,3).map(r=>residentRow(r)).join('')}</div>`}
 
     <div class="section-title"><h2>Quick actions</h2></div>
     <div class="btn-row" style="margin-top:0;">
