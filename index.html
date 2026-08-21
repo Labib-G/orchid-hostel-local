@@ -156,6 +156,16 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
   70%{box-shadow:0 0 0 16px rgba(var(--orchid-rgb),0),0 10px 24px -8px rgba(4,120,87,.55);}
   100%{box-shadow:0 0 0 0 rgba(var(--orchid-rgb),0),0 10px 24px -8px rgba(4,120,87,.55);}
 }
+.add-resident-pulse{
+  background:linear-gradient(135deg,var(--green),var(--green));
+  box-shadow:0 0 0 0 rgba(16,185,129,.7);
+  animation:addPulse 1.6s ease-in-out infinite;
+}
+@keyframes addPulse{
+  0%{box-shadow:0 0 0 0 rgba(16,185,129,.0);}
+  50%{box-shadow:0 0 0 12px rgba(16,185,129,.35),0 8px 18px -6px rgba(16,185,129,.5);}
+  100%{box-shadow:0 0 0 0 rgba(16,185,129,.0),0 8px 18px -6px rgba(16,185,129,.2);}
+}
 
 /* ============ TYPE HELPERS ============ */
 .eyebrow{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-soft);}
@@ -694,7 +704,7 @@ function renderDashboard(){
 
     <div class="section-title"><h2>Quick actions</h2></div>
     <div class="btn-row" style="margin-top:0;">
-      <button class="btn btn-ghost" data-nav="residentForm">＋ Add resident</button>
+      <button class="btn btn-ghost add-resident-pulse" data-nav="residentForm">＋ Add resident</button>
     </div>
   `;
 }
