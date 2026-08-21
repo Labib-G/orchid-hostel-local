@@ -31,8 +31,8 @@
   --ink:#241B2C;
   --ink-soft:#6B5D71;
   --ink-faint:#A99CAC;
-  --orchid:#059669;
-  --orchid-deep:#047857;
+  --orchid:#047857;
+  --orchid-deep:#065F46;
   --orchid-fg:#047857;
   --orchid-rgb:5,150,105;
   --orchid-tint:#D1FAE5;
@@ -60,8 +60,8 @@
   --ink:#E9F1EC;
   --ink-soft:#A9B8B2;
   --ink-faint:#6E7C76;
-  --orchid:#059669;
-  --orchid-deep:#047857;
+  --orchid:#047857;
+  --orchid-deep:#065F46;
   --orchid-fg:#6EE7B7;
   --orchid-rgb:52,211,153;
   --orchid-tint:#064E3B;
@@ -78,7 +78,7 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]):not([data-theme="dark"]){
     --paper:#0F1613; --paper-alt:#16201B; --card:#16201B; --ink:#E9F1EC; --ink-soft:#A9B8B2; --ink-faint:#6E7C76;
-    --orchid:#059669; --orchid-deep:#047857; --orchid-fg:#6EE7B7; --orchid-rgb:52,211,153; --orchid-tint:#064E3B;
+    --orchid:#047857; --orchid-deep:#065F46; --orchid-fg:#6EE7B7; --orchid-rgb:52,211,153; --orchid-tint:#064E3B;
     --gold:#E3B65C; --gold-tint:#3A2F17; --green:#71C088; --green-tint:#1E3324; --rust:#E58B70; --rust-tint:#3B2119;
     --border:#223029; --shadow:0 8px 24px -12px rgba(0,0,0,.6); --outer-bg:#070B09;
   }
@@ -154,7 +154,7 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
 .mic-btn{
   position:fixed; z-index:30; right:calc(50% - 240px + 18px); bottom:78px;
   width:58px;height:58px;border-radius:50%;border:none;
-  background:linear-gradient(155deg,var(--orchid),var(--orchid-deep));
+  background:linear-gradient(45deg,var(--orchid),var(--orchid-deep));
   color:#fff; box-shadow:0 10px 24px -8px rgba(4,120,87,.55);
   display:flex;align-items:center;justify-content:center;
 }
@@ -190,7 +190,7 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
   background:var(--card); border:1px solid var(--border); border-radius:var(--radius-card);
   padding:14px 16px; position:relative; overflow:hidden;
 }
-.stat-card.accent-orchid{background:linear-gradient(165deg,var(--orchid),var(--orchid-deep)); border:none; color:#fff;}
+.stat-card.accent-orchid{background:linear-gradient(45deg,var(--orchid),var(--orchid-deep)); border:none; color:#fff;}
 .stat-card.accent-orchid .eyebrow{color:#fff; font-weight:700; font-size:16px;}
 .stat-card .eyebrow{margin-bottom:6px;}
 
@@ -317,7 +317,7 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
 }
 .voice-orb{
   width:76px;height:76px;border-radius:50%; margin:0 auto 16px;
-  background:linear-gradient(155deg,var(--orchid),var(--orchid-deep)); display:flex;align-items:center;justify-content:center;color:#fff;
+  background:linear-gradient(45deg,var(--orchid),var(--orchid-deep)); display:flex;align-items:center;justify-content:center;color:#fff;
 }
 .voice-orb svg{width:30px;height:30px;}
 .voice-orb.listening{animation:pulse 1.4s ease-in-out infinite;}
