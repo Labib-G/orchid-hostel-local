@@ -609,6 +609,7 @@ async function loadAll(){
     await seedDefaultRooms();
     state.seats = await DB.listSeats();
   }
+  await ensureSingleRooms();
   await purgeExpiredTrash();
 }
 
@@ -1162,13 +1163,28 @@ function openSheet(html, onMount){
 function closeSheet(){ $('#sheet-overlay').classList.add('hidden'); $('#sheet-overlay').innerHTML=''; }
 
 /* ---------- default rooms (seeded once) ---------- */
-const DEFAULT_ROOM_SEATS = { 3:1, 6:1, 32:1, 33:1, 25:3, 42:3 };
+const DEFAULT_ROOM_SEATS = { 3:1, 6:1, 32:1, 33:1, 37:1, 38:1, 25:3, 42:3 };
 async function seedDefaultRooms(){
   if (state.seats.length) return;
   for (let n=1; n<=42; n++){
     const count = DEFAULT_ROOM_SEATS[n] || 2;
     const bedType = count===1 ? 'single' : count===3 ? 'triple' : 'double';
     await addRoom(String(n), count, '', bedType);
+  }
+}
+async function ensureSingleRooms(){
+  // For rooms meant to be single (37, 38), drop any EXTRA seats that are empty,
+  // so the change also applies to devices that already seeded with 2 seats.
+  // Occupied extra seats are left alone (we never displace a resident automatically).
+  for (const rn of [37, 38]){
+    const rm = String(rn);
+    const seats = state.seats.filter(s=>s.room===rm).sort((a,b)=>a.seatLabel.localeCompare(b.seatLabel));
+    for (let i=1; i<seats.length; i++){
+      if (!seats[i].residentId){
+        await DB.deleteSeat(seats[i].id);
+        state.seats = state.seats.filter(s=>s.id!==seats[i].id);
+      }
+    }
   }
 }
 async function addRoom(room, count, floor='', bedType=''){
