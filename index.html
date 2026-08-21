@@ -1320,6 +1320,11 @@ function bindViewEvents(){
       const editing = state._openId ? state.residents.find(x=>x.id===state._openId) : null;
       const curSeat = editing ? residentSeat(editing.id) : null;
       populateSeatSelect(rfRoom.value, state._openId, curSeat?.seatLabel);
+      const rentInput0 = rf.querySelector('input[name=\"monthlyRent\"]');
+      if (rentInput0 && !rentInput0.value && rfRoom.value){
+        const dr0 = defaultRentForRoom(rfRoom.value);
+        if (dr0) rentInput0.value = dr0;
+      }
       rfRoom.addEventListener('change', () => {
         populateSeatSelect(rfRoom.value, state._openId, null);
         const rentInput = rf.querySelector('input[name="monthlyRent"]');
