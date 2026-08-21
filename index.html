@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <title>Orchid Hostel</title>
-<meta name="theme-color" content="#10B981" />
+<meta name="theme-color" content="#0F1613" />
 <meta name="description" content="Seats, residents, dues and voice-controlled records for Orchid Hostel" />
 <link rel="manifest" href="./manifest.json" />
 <link rel="icon" href="./icon-192.png" />
@@ -14,12 +14,7 @@
 <script>
 /* Apply the saved theme before first paint, so there's no flash of the wrong theme. */
 (function(){
-  try{
-    var pref = JSON.parse(localStorage.getItem('orchid_theme') || '"dark"');
-    var eff = (pref === 'dark' || pref === 'light') ? pref :
-      ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
-    document.documentElement.setAttribute('data-theme', eff);
-  }catch(e){}
+  try{ document.documentElement.setAttribute('data-theme', 'dark'); }catch(e){}
 })();
 </script>
 <style>
@@ -121,11 +116,6 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
 .brand-mark{width:26px;height:26px;flex:none;}
 .brand-name{font-family:var(--font-display); font-weight:700; font-size:19px; letter-spacing:.2px;}
 .topbar-actions{display:flex; align-items:center; gap:8px;}
-.theme-toggle{
-  width:30px;height:30px;border-radius:50%; flex:none; border:1px solid var(--border);
-  background:var(--paper-alt); color:var(--ink-soft); display:flex; align-items:center; justify-content:center;
-}
-.theme-toggle svg{width:15px;height:15px;}
 .sync-pill{
   font-family:var(--font-mono); font-size:11px; padding:5px 10px; border-radius:var(--radius-pill);
   background:var(--paper-alt); color:var(--ink-soft); border:1px solid var(--border);
@@ -384,9 +374,6 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
       <span class="brand-name" id="brand-name">Orchid Hostel</span>
     </div>
     <div class="topbar-actions">
-      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
-        <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
-      </button>
       <button class="sync-pill" id="sync-pill"><span class="dot"></span><span id="sync-label">Local</span></button>
     </div>
   </header>
@@ -455,41 +442,11 @@ function initials(name){
 const LS = {
   residents:'orchid_residents', seats:'orchid_seats', payments:'orchid_payments',
   settings:'orchid_settings', fbConfig:'orchid_firebase_config', geminiKey:'orchid_gemini_key',
-  pin:'orchid_pin', localUnlocked:'orchid_local_unlocked', theme:'orchid_theme'
+  pin:'orchid_pin', localUnlocked:'orchid_local_unlocked'
 };
 function lsGet(k, fb){ try{ const v = localStorage.getItem(k); return v===null ? fb : JSON.parse(v); }catch(e){ return fb; } }
 function lsSet(k, v){ localStorage.setItem(k, JSON.stringify(v)); }
 function defaultSettings(){ return { hostelName:'Orchid Hostel', currency:'৳', lastGeneratedMonth:'', voiceLang:'en-US' }; }
-
-/* ---------- theme (light / dark / system) ---------- */
-const SUN_PATH = '<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.9 19.1l1.7-1.7M17.4 6.6l1.7-1.7"/>';
-const MOON_PATH = '<path d="M21 13.2A9 9 0 1 1 10.8 3 7.2 7.2 0 0 0 21 13.2Z"/>';
-function effectiveTheme(pref){
-  if (pref==='dark' || pref==='light') return pref;
-  return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
-}
-function applyTheme(){
-  const pref = lsGet(LS.theme, 'dark');
-  const eff = effectiveTheme(pref);
-  document.documentElement.setAttribute('data-theme', eff);
-  const icon = $('#theme-icon');
-  if (icon) icon.innerHTML = eff==='dark' ? MOON_PATH : SUN_PATH;
-  const metaTheme = document.querySelector('meta[name="theme-color"]');
-  if (metaTheme) metaTheme.setAttribute('content', eff==='dark' ? '#0F1613' : '#10B981');
-}
-function toggleTheme(){
-  const eff = effectiveTheme(lsGet(LS.theme, 'dark'));
-  lsSet(LS.theme, eff==='dark' ? 'light' : 'dark');
-  applyTheme();
-}
-if (window.matchMedia){
-  const mq = window.matchMedia('(prefers-color-scheme: dark)');
-  const onSchemeChange = () => { if (lsGet(LS.theme, 'dark')==='system') applyTheme(); };
-  try{
-    if (mq.addEventListener) mq.addEventListener('change', onSchemeChange);
-    else if (mq.addListener) mq.addListener(onSchemeChange); // older WebView fallback
-  }catch(e){ /* non-fatal: theme just won't live-update if OS theme changes mid-session */ }
-}
 
 /* ---------- cloud (Firebase) state, lazily initialised ---------- */
 const FB_VER = '12.17.1';
@@ -1060,22 +1017,8 @@ function renderSettings(){
   const s = state.settings;
   const fbCfg = lsGet(LS.fbConfig, null);
   const gKey = lsGet(LS.geminiKey, '');
-  const themePref = lsGet(LS.theme, 'dark');
   return `
     <div class="section-title"><h2>Settings</h2></div>
-
-    <div class="section-title" style="margin-top:0;"><h2>Appearance</h2></div>
-    <div class="card">
-      <div class="seg-row">
-        <button class="seg-btn ${themePref==='light'?'active':''}" data-theme-pref="light">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${SUN_PATH}</svg> Light
-        </button>
-        <button class="seg-btn ${themePref==='dark'?'active':''}" data-theme-pref="dark">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${MOON_PATH}</svg> Dark
-        </button>
-        <button class="seg-btn ${themePref==='system'?'active':''}" data-theme-pref="system">System</button>
-      </div>
-    </div>
 
     <div class="card">
       <div class="field"><label>Hostel name</label><input id="set-hostel-name" value="${esc(s.hostelName)}" /></div>
@@ -1313,7 +1256,6 @@ function bindViewEvents(){
   $$('[data-rfilter]').forEach(el => el.addEventListener('click', () => { state.residentFilter = el.dataset.rfilter; render(); }));
   $('#resident-search')?.addEventListener('input', (e) => { state._residentSearch = e.target.value; render(); });
   $$('[data-seat]').forEach(el => el.addEventListener('click', () => openSeatSheet(el.dataset.seat)));
-  $$('[data-theme-pref]').forEach(el => el.addEventListener('click', () => { lsSet(LS.theme, el.dataset.themePref); applyTheme(); render(); }));
   $('#seat-search')?.addEventListener('input', (e) => { state._seatSearch = e.target.value; render(); });
   $$('[data-seat-sort]').forEach(el => el.addEventListener('click', () => { state.seatSortMode = el.dataset.seatSort; render(); }));
 
@@ -1495,7 +1437,6 @@ $('#tabbar').addEventListener('click', (e) => {
   nav(btn.dataset.view);
 });
 $('#sync-pill').addEventListener('click', () => nav('settings'));
-$('#theme-toggle').addEventListener('click', toggleTheme);
 
 /* ================= GEMINI VOICE ASSISTANT ================= */
 const GEMINI_MODEL = 'gemini-3.7-flash';
@@ -1779,7 +1720,6 @@ function showLockScreen(){
 
 /* ================= BOOT ================= */
 async function boot(){
-  applyTheme();
   try{ await initCloud(); }catch(e){ /* toast already shown */ }
 
   if (cloud){
