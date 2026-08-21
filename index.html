@@ -671,11 +671,11 @@ function renderDashboard(){
         ${progressRingSVG({collected:totals.collected, totalDue:totals.totalDue, currency:cur, size:106})}
       </div>
       <div class="stat-card">
-        <div class="eyebrow">Seats empty</div>
+        <div class="eyebrow" style="font-weight:700;">Seats empty</div>
         <div class="big-num" style="color:var(--green)">${seatsEmpty}</div>
       </div>
       <div class="stat-card">
-        <div class="eyebrow">Residents</div>
+        <div class="eyebrow" style="font-weight:700;">Residents</div>
         <div class="big-num">${seatsOccupied}<span class="faint" style="font-size:15px;">/${seatsTotal}</span></div>
       </div>
     </div>
