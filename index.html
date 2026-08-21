@@ -191,7 +191,9 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
   padding:14px 16px; position:relative; overflow:hidden;
 }
 .stat-card.accent-orchid{background:linear-gradient(135deg,#064E3B,#0B6B4F,#10B981); background-size:200% 200%; animation:orchidShift 7s ease-in-out infinite; border:none; color:#fff;}
+.stat-card.accent-orchid.due-alert{animation:orchidShift 7s ease-in-out infinite, dueGlow 1.6s ease-in-out infinite;}
 @keyframes orchidShift{0%{background-position:0% 0%;}50%{background-position:100% 100%;}100%{background-position:0% 0%;}}
+@keyframes dueGlow{0%,100%{box-shadow:0 0 0 0 rgba(225,29,29,0);}50%{box-shadow:0 0 16px 3px rgba(225,29,29,.9);}}
 .stat-card.accent-orchid .eyebrow{color:#fff; font-weight:700; font-size:16px;}
 .stat-card .eyebrow{margin-bottom:6px;}
 
@@ -698,10 +700,11 @@ function renderDashboard(){
   const prevOutstanding = state.payments
     .filter(p => p.month < mk && ids.has(p.residentId))
     .reduce((s,p)=> s + Math.max(0,(p.amountDue||0)-(p.amountPaid||0)), 0);
+  const hasDue = totalDue > 0 || prevOutstanding > 0;
 
   return `
     <div class="stat-grid">
-      <div class="stat-card accent-orchid" style="display:flex; flex-direction:column;">
+      <div class="stat-card accent-orchid${hasDue ? ' due-alert' : ''}" style="display:flex; flex-direction:column;">
         <div class="eyebrow">Total due</div>
         <div class="big-num">${esc(cur)}${fmtMoney(totalDue)}</div>
         <div style="${prevOutstanding>0 ? 'font-size:13px; margin-top:4px;' : 'font-size:16px; margin-top:auto;'} color:#fff; font-family:var(--font-mono);">${prevOutstanding>0 ? `<div style="font-size:15px; margin-top:2px; color:#fff;">${esc(cur)}${fmtMoney(prevOutstanding)}</div><div style="font-size:12px; margin-top:1px; letter-spacing:.06em; color:#fff;">PREVIOUS DUES</div>` : 'NO PREVIOUS DUES'}</div>
