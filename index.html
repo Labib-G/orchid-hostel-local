@@ -670,7 +670,7 @@ function renderDashboard(){
         <div class="big-num">${esc(cur)}${fmtMoney(totalDue)}</div>
         <div style="${prevOutstanding>0 ? 'font-size:13px; margin-top:4px;' : 'font-size:16px; margin-top:auto;'} color:#fff; font-family:var(--font-mono);">${prevOutstanding>0 ? `<div style="font-size:15px; margin-top:2px; color:#fff;">${esc(cur)}${fmtMoney(prevOutstanding)}</div><div style="font-size:12px; margin-top:1px; letter-spacing:.06em; color:#fff;">PREVIOUS DUES</div>` : 'NO PREVIOUS DUES'}</div>
       </div>
-      <div class="stat-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2px 2px;">
+      <div class="stat-card" data-nav="transactions" role="button" tabindex="0" style="display:inline-flex; flex-direction:column; align-items:center; justify-content:center; padding:2px 2px; cursor:pointer;">
         <div class="eyebrow" style="align-self:flex-start; margin-left:15px; font-weight:700;">Money received</div>
         ${progressRingSVG({collected:totals.collected, totalDue:totals.totalDue, currency:cur, size:132})}
       </div>
@@ -1016,6 +1016,36 @@ function renderDues(){
   `;
 }
 
+function renderTransactions(){
+  const cur = state.settings.currency;
+  const rows = state.payments
+    .filter(p => visibleResidentIdSet().has(p.residentId))
+    .slice()
+    .sort((a,b)=> b.month.localeCompare(a.month) || (b.paidDate||'').localeCompare(a.paidDate||''));
+  return `
+    <div class="topline">
+      <button class="iconbtn" data-nav="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <h2 style="font-size:17px;">Transactions</h2>
+    </div>
+    <p class="muted" style="font-size:12.5px; margin:-6px 0 14px;">Every time the admin marks a resident as paid for a month, it's recorded here.</p>
+    ${rows.length===0 ? emptyState('check','No transactions yet','') :
+      `<div class="card" style="padding:4px 12px;">${rows.map(p=>{
+        const r = state.residents.find(x=>x.id===p.residentId);
+        const resName = r ? r.name : (p.residentName||'Unknown');
+        const st = p.status || 'due';
+        return `<div class="list-row">
+          <div class="avatar">${esc(initials(resName))}</div>
+          <div class="row-main">
+            <div class="row-title">${esc(resName)}</div>
+            <div class="row-sub">${esc(monthLabel(p.month))} · ${esc(cur)}${fmtMoney(p.amountPaid||0)} of ${esc(cur)}${fmtMoney(p.amountDue||0)}</div>
+            <div class="row-sub mono" style="font-size:11px; color:var(--ink-faint); margin-top:1px;">Paid ${p.paidDate ? new Date(p.paidDate).toLocaleString() : '— not marked paid'}</div>
+          </div>
+          <span class="badge ${st}">${st}</span>
+        </div>`;
+      }).join('')}</div>`}
+  `;
+}
+
 /* ---------- rendering: settings ---------- */
 function renderSettings(){
   const s = state.settings;
@@ -1097,7 +1127,8 @@ async function render(){
   else if (state.view==='residentDetail') root.innerHTML = renderResidentDetail(state._openId);
   else if (state.view==='residentForm') root.innerHTML = renderResidentForm(state._openId);
   else if (state.view==='seats') root.innerHTML = renderSeats();
-  else if (state.view==='dues') root.innerHTML = renderDues();
+    else if (state.view==='dues') root.innerHTML = renderDues();
+    else if (state.view==='transactions') root.innerHTML = renderTransactions();
   else if (state.view==='settings') root.innerHTML = renderSettings();
   else if (state.view==='trash') root.innerHTML = renderTrash();
   bindViewEvents();
