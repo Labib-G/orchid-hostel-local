@@ -694,6 +694,10 @@ function renderDashboard(){
   const totalDue = totalDueAmount(mk);
   const cur = state.settings.currency;
   const totals = monthTotals(mk);
+  const ids = visibleResidentIdSet();
+  const prevOutstanding = state.payments
+    .filter(p => p.month < mk && ids.has(p.residentId))
+    .reduce((s,p)=> s + Math.max(0,(p.amountDue||0)-(p.amountPaid||0)), 0);
 
   return `
     <div class="section-title"><h2>Overview</h2><span class="faint mono" style="font-size:11.5px;">${esc(monthLabel(mk))}</span></div>
@@ -701,6 +705,7 @@ function renderDashboard(){
       <div class="stat-card accent-orchid">
         <div class="eyebrow">Total due</div>
         <div class="big-num">${esc(cur)}${fmtMoney(totalDue)}</div>
+        <div style="font-size:11.5px; margin-top:3px; color:rgba(255,255,255,.85);">${prevOutstanding>0 ? `${esc(cur)}${fmtMoney(prevOutstanding)} from prev. months` : 'No prev. dues'}</div>
       </div>
       <div class="stat-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px 8px;">
         <div class="eyebrow" style="align-self:flex-start;">Money received</div>
