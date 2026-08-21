@@ -667,7 +667,7 @@ function renderDashboard(){
         <div style="${prevOutstanding>0 ? 'font-size:13px; margin-top:4px;' : 'font-size:16px; margin-top:auto;'} color:#fff; font-family:var(--font-mono);">${prevOutstanding>0 ? `<div style="font-size:15px; margin-top:2px; color:#fff;">${esc(cur)}${fmtMoney(prevOutstanding)}</div><div style="font-size:12px; margin-top:1px; letter-spacing:.06em; color:#fff;">PREVIOUS DUES</div>` : 'NO PREVIOUS DUES'}</div>
       </div>
       <div class="stat-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2px 2px;">
-        <div class="eyebrow" style="align-self:flex-start; margin-left:8px; font-weight:700;">Money received</div>
+        <div class="eyebrow" style="align-self:flex-start; margin-left:11px; font-weight:700;">Money received</div>
         ${progressRingSVG({collected:totals.collected, totalDue:totals.totalDue, currency:cur, size:132})}
       </div>
       <div class="stat-card">
