@@ -24,7 +24,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
 /* ============ TOKENS ============ */
 :root{
@@ -54,7 +54,7 @@
   --radius-pill:999px;
   --font-display:'Fraunces',serif;
   --font-body:'Inter',system-ui,sans-serif;
-  --font-mono:'IBM Plex Mono',monospace;
+  --font-mono:'Space Grotesk','Inter',sans-serif;
 }
 [data-theme="dark"]{
   --paper:#1B1620;
@@ -174,7 +174,7 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
 .eyebrow{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-soft);}
 .muted{color:var(--ink-soft);}
 .faint{color:var(--ink-faint);}
-.mono{font-family:var(--font-mono);}
+.mono{font-family:var(--font-mono); font-variant-numeric:tabular-nums;}
 .big-num{font-family:var(--font-display); font-size:34px; font-weight:700; line-height:1;}
 
 /* ============ CARDS / SECTIONS ============ */
@@ -680,7 +680,7 @@ function progressRingSVG({collected, totalDue, currency, size=152}){
         transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dashoffset .4s ease;"/>
       <text x="${cx}" y="${cy-4}" text-anchor="middle" font-family="'Fraunces',serif" font-weight="700"
         font-size="${size*0.145}" fill="var(--ink)">${esc(currency)}${fmtMoney(collected)}</text>
-      <text x="${cx}" y="${cy+18}" text-anchor="middle" font-family="'IBM Plex Mono',monospace"
+      <text x="${cx}" y="${cy+18}" text-anchor="middle" font-family="'Space Grotesk','Inter',sans-serif"
         font-size="${size*0.06}" fill="var(--ink-soft)">received</text>
     </svg>`;
 }
