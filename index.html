@@ -705,15 +705,15 @@ function renderDashboard(){
         <div class="big-num">${esc(cur)}${fmtMoney(totalDue)}</div>
       </div>
       <div class="stat-card">
-        <div class="eyebrow">Residents</div>
-        <div class="big-num">${active.length}</div>
+        <div class="eyebrow">Occupancy</div>
+        <div class="big-num">${seatsTotal ? Math.round(seatsOccupied/seatsTotal*100) : 0}<span class="faint" style="font-size:15px;">%</span></div>
       </div>
       <div class="stat-card">
         <div class="eyebrow">Seats empty</div>
         <div class="big-num" style="color:var(--green)">${seatsEmpty}</div>
       </div>
       <div class="stat-card">
-        <div class="eyebrow">Seats occupied</div>
+        <div class="eyebrow">Residents</div>
         <div class="big-num">${seatsOccupied}<span class="faint" style="font-size:15px;">/${seatsTotal}</span></div>
       </div>
     </div>
