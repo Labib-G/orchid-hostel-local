@@ -674,7 +674,7 @@ function renderDashboard(){
         <div class="eyebrow" style="align-self:flex-start; margin-left:15px; font-weight:700;">Money received</div>
         ${progressRingSVG({collected:totals.collected, totalDue:totals.totalDue, currency:cur, size:132})}
       </div>
-      <div class="stat-card">
+      <div class="stat-card" data-nav="emptySeats" role="button" tabindex="0" style="display:flex; flex-direction:column; cursor:pointer;">
         <div class="eyebrow" style="font-weight:700;">Seats empty</div>
         <div class="big-num" style="color:var(--green)">${seatsEmpty}</div>
       </div>
@@ -1016,6 +1016,24 @@ function renderDues(){
   `;
 }
 
+function renderEmptySeats(){
+  const empty = state.seats.filter(s => !s.residentId).slice().sort((a,b)=> (a.room+b.seatLabel).localeCompare(b.room+a.seatLabel));
+  if (empty.length===0) return `<div class="topline"><button class="iconbtn" data-nav="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button><h2 style="font-size:17px;">Empty seats</h2></div>
+    ${emptyState('door','All seats filled','Every seat has a resident.')}`;
+  const byRoom = {};
+  empty.forEach(s => { (byRoom[s.room] = byRoom[s.room]||[]).push(s); });
+  const roomNames = Object.keys(byRoom).sort((a,b)=> a.localeCompare(b,undefined,{numeric:true}));
+  return `<div class="topline"><button class="iconbtn" data-nav="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button><h2 style="font-size:17px;">Empty seats</h2></div>
+    ${roomNames.map(room => `
+      <div class="room-block">
+        <h3>Room ${esc(room)} · ${byRoom[room].length} empty</h3>
+        <div class="tag-grid">
+          ${byRoom[room].sort((a,b)=>a.seatLabel.localeCompare(b.seatLabel,undefined,{numeric:true})).map(s => `<button class="key-tag" data-seat="${s.id}"><div class="plate"><div class="hole"></div></div><span class="lbl">${esc(s.seatLabel)}</span></button>`).join('')}
+        </div>
+      </div>`).join('')}
+  `;
+}
+
 function renderTransactions(){
   const cur = state.settings.currency;
   const rows = state.payments
@@ -1127,6 +1145,7 @@ async function render(){
   else if (state.view==='residentDetail') root.innerHTML = renderResidentDetail(state._openId);
   else if (state.view==='residentForm') root.innerHTML = renderResidentForm(state._openId);
   else if (state.view==='seats') root.innerHTML = renderSeats();
+  else if (state.view==='emptySeats') root.innerHTML = renderEmptySeats();
     else if (state.view==='dues') root.innerHTML = renderDues();
     else if (state.view==='transactions') root.innerHTML = renderTransactions();
   else if (state.view==='settings') root.innerHTML = renderSettings();
