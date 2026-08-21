@@ -627,16 +627,20 @@ function monthTotals(mk = monthKey()){
   const collected = list.reduce((s,p)=>s+(p.amountPaid||0),0);
   return { totalDue, collected, outstanding: Math.max(0, totalDue-collected) };
 }
-function progressRingSVG({collected, totalDue, currency, size=152}){
+function progressRingSVG({collected, totalDue, currency, size=152, oval=1.4}){
   const r = size/2 - 7, c = 2*Math.PI*r, cx = size/2, cy = size/2;
   const pct = totalDue>0 ? Math.min(1, collected/totalDue) : (collected>0 ? 1 : 0);
   const offset = c * (1-pct);
+  // oval: scale the rings horizontally around the centre; text stays outside the group so it's unsquashed.
+  const g = `translate(${cx},${cy}) scale(${oval},1) translate(${-cx},${-cy})`;
   return `
     <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" style="display:block;">
-      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="12"/>
-      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--orchid)" stroke-width="12"
-        stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}"
-        transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dashoffset .4s ease;"/>
+      <g transform="${g}">
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="12"/>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--orchid)" stroke-width="12"
+          stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}"
+          transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dashoffset .4s ease;"/>
+      </g>
       <text x="${cx}" y="${cy+5}" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="700"
         font-size="${size*0.16}" fill="var(--ink)">${esc(currency)}${fmtMoney(collected)}</text>
     </svg>`;
