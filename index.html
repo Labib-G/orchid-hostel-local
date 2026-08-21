@@ -674,7 +674,7 @@ function progressRingSVG({collected, totalDue, currency, size=152}){
   const offset = c * (1-pct);
   return `
     <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" style="display:block;">
-      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--paper-alt)" stroke-width="12"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="12"/>
       <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--orchid)" stroke-width="12"
         stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}"
         transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dashoffset .4s ease;"/>
