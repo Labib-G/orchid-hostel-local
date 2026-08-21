@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Orchid Hostel</title>
+<meta name="theme-color" content="#A6337B" />
+<meta name="description" content="Seats, residents, dues and voice-controlled records for Orchid Hostel" />
+<link rel="manifest" href="./manifest.json" />
+<link rel="icon" href="./icon-192.png" />
+<link rel="apple-touch-icon" href="./icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<script>
+/* Apply the saved theme before first paint, so there's no flash of the wrong theme. */
+(function(){
+  try{
+    var pref = JSON.parse(localStorage.getItem('orchid_theme') || '"dark"');
+    var eff = (pref === 'dark' || pref === 'light') ? pref :
+      ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', eff);
+  }catch(e){}
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --paper:#FBF7F5;
+  --paper-alt:#F1E7E1;
+  --card:#FFFFFF;
+  --ink:#241B2C;
+  --ink-soft:#6B5D71;
+  --ink-faint:#A99CAC;
+  --orchid:#A6337B;
+  --orchid-deep:#7A2560;
+  --orchid-fg:#A6337B;
+  --orchid-rgb:166,51,123;
+  --orchid-tint:#F3E1EC;
+  --gold:#B8862B;
+  --gold-tint:#F6ECD5;
+  --green:#3F7A54;
+  --green-tint:#E4EFE6;
+  --rust:#A83E24;
+  --rust-tint:#F5E4DE;
+  --border:#E6DAD3;
+  --shadow:0 8px 24px -12px rgba(36,27,44,.25);
+  --outer-bg:#DCCFC6;
+  --toast-bg:#241B2C;
+  --radius-card:16px;
+  --radius-tag:10px;
+  --radius-pill:999px;
+  --font-display:'Fraunces',serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+}
+[data-theme="dark"]{
+  --paper:#1B1620;
+  --paper-alt:#251F2C;
+  --card:#251F2C;
+  --ink:#F3ECE7;
+  --ink-soft:#B6A9BE;
+  --ink-faint:#75687F;
+  --orchid:#BD4F8F;
+  --orchid-deep:#7A2560;
+  --orchid-fg:#E9A0CB;
+  --orchid-rgb:189,79,143;
+  --orchid-tint:#3A1F30;
+  --gold:#E3B65C;
+  --gold-tint:#3A2F17;
+  --green:#71C088;
+  --green-tint:#1E3324;
+  --rust:#E58B70;
+  --rust-tint:#3B2119;
+  --border:#3A3242;
+  --shadow:0 8px 24px -12px rgba(0,0,0,.6);
+  --outer-bg:#0E0B12;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]):not([data-theme="dark"]){
+    --paper:#1B1620; --paper-alt:#251F2C; --card:#251F2C; --ink:#F3ECE7; --ink-soft:#B6A9BE; --ink-faint:#75687F;
+    --orchid:#BD4F8F; --orchid-deep:#7A2560; --orchid-fg:#E9A0CB; --orchid-rgb:189,79,143; --orchid-tint:#3A1F30;
+    --gold:#E3B65C; --gold-tint:#3A2F17; --green:#71C088; --green-tint:#1E3324; --rust:#E58B70; --rust-tint:#3B2119;
+    --border:#3A3242; --shadow:0 8px 24px -12px rgba(0,0,0,.6); --outer-bg:#0E0B12;
+  }
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--outer-bg);
+  color:var(--ink);
+  font-family:var(--font-body);
+  -webkit-tap-highlight-color:transparent;
+  min-height:100vh;
+  transition:background .2s ease;
+}
+button,input,select,textarea{font-family:inherit;color:inherit;}
+button{cursor:pointer;}
+h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
+.hidden{display:none !important;}
+::selection{background:var(--orchid-tint);}
+
+/* ============ APP SHELL ============ */
+.app-frame{
+  max-width:480px;
+  margin:0 auto;
+  min-height:100vh;
+  background:var(--paper);
+  position:relative;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+}
+.topbar{
+  position:sticky; top:0; z-index:20;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; background:var(--paper);
+  border-bottom:1px solid var(--border);
+  transition:background .2s ease, border-color .2s ease;
+}
+.brand{display:flex; align-items:center; gap:9px;}
+.brand-mark{width:26px;height:26px;flex:none;}
+.brand-name{font-family:var(--font-display); font-weight:700; font-size:19px; letter-spacing:.2px;}
+.topbar-actions{display:flex; align-items:center; gap:8px;}
+.theme-toggle{
+  width:30px;height:30px;border-radius:50%; flex:none; border:1px solid var(--border);
+  background:var(--paper-alt); color:var(--ink-soft); display:flex; align-items:center; justify-content:center;
+}
+.theme-toggle svg{width:15px;height:15px;}
+.sync-pill{
+  font-family:var(--font-mono); font-size:11px; padding:5px 10px; border-radius:var(--radius-pill);
+  background:var(--paper-alt); color:var(--ink-soft); border:1px solid var(--border);
+  display:flex; align-items:center; gap:5px; cursor:pointer;
+}
+.sync-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--ink-faint);}
+.sync-pill.cloud .dot{background:var(--green);}
+.sync-pill.err .dot{background:var(--rust);}
+
+.view-root{ flex:1; padding:16px 16px 100px; overflow-y:auto; }
+
+.tabbar{
+  position:sticky; bottom:0; z-index:20;
+  display:flex; background:var(--card); border-top:1px solid var(--border);
+  padding:6px 6px calc(6px + env(safe-area-inset-bottom));
+}
+.tab{
+  flex:1; background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:7px 2px; border-radius:12px; color:var(--ink-faint); font-size:10.5px; font-weight:600;
+}
+.tab svg{width:21px;height:21px;}
+.tab.active{color:var(--orchid-fg);}
+.tab.active .tab-dot{opacity:1;}
+.tab-dot{width:4px;height:4px;border-radius:50%;background:var(--orchid-fg);opacity:0;margin-top:-1px;}
+
+.mic-btn{
+  position:fixed; z-index:30; right:calc(50% - 240px + 18px); bottom:78px;
+  width:58px;height:58px;border-radius:50%;border:none;
+  background:linear-gradient(155deg,var(--orchid),var(--orchid-deep));
+  color:#fff; box-shadow:0 10px 24px -8px rgba(122,37,96,.55);
+  display:flex;align-items:center;justify-content:center;
+}
+.mic-btn svg{width:24px;height:24px;}
+@media (max-width:520px){ .mic-btn{ right:20px; } }
+.mic-btn.listening{animation:pulse 1.4s ease-in-out infinite;}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(var(--orchid-rgb),.5),0 10px 24px -8px rgba(122,37,96,.55);}
+  70%{box-shadow:0 0 0 16px rgba(var(--orchid-rgb),0),0 10px 24px -8px rgba(122,37,96,.55);}
+  100%{box-shadow:0 0 0 0 rgba(var(--orchid-rgb),0),0 10px 24px -8px rgba(122,37,96,.55);}
+}
+
+/* ============ TYPE HELPERS ============ */
+.eyebrow{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-soft);}
+.muted{color:var(--ink-soft);}
+.faint{color:var(--ink-faint);}
+.mono{font-family:var(--font-mono);}
+.big-num{font-family:var(--font-display); font-size:34px; font-weight:700; line-height:1;}
+
+/* ============ CARDS / SECTIONS ============ */
+.section-title{display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 10px;}
+.section-title:first-child{margin-top:0;}
+.section-title h2{font-size:16px;}
+.link-btn{background:none;border:none;color:var(--orchid-fg);font-weight:600;font-size:13px;padding:4px;}
+
+.card{
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius-card);
+  padding:16px; margin-bottom:12px;
+}
+.stat-grid{display:flex; flex-wrap:wrap; gap:10px;}
+.stat-grid .stat-card{flex:1 1 calc(50% - 5px); min-width:140px;}
+.stat-card{
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius-card);
+  padding:14px 16px; position:relative; overflow:hidden;
+}
+.stat-card.accent-orchid{background:linear-gradient(165deg,var(--orchid),var(--orchid-deep)); border:none; color:#fff;}
+.stat-card.accent-orchid .eyebrow{color:rgba(255,255,255,.75);}
+.stat-card .eyebrow{margin-bottom:6px;}
+
+.list-row{
+  display:flex; align-items:center; gap:12px; padding:12px 4px; border-bottom:1px solid var(--border);
+}
+.list-row:last-child{border-bottom:none;}
+.avatar{
+  width:38px;height:38px;border-radius:50%;background:var(--orchid-tint);color:var(--orchid-fg);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--font-display);
+  flex:none; font-size:15px;
+}
+.row-main{flex:1; min-width:0;}
+.row-title{font-weight:600; font-size:14.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.row-sub{font-size:12.5px; color:var(--ink-soft); margin-top:1px;}
+.chev{color:var(--ink-faint); flex:none;}
+
+.badge{
+  font-family:var(--font-mono); font-size:10.5px; font-weight:600; padding:3px 8px; border-radius:var(--radius-pill);
+  white-space:nowrap;
+}
+.badge.paid{background:var(--green-tint); color:var(--green);}
+.badge.due{background:var(--rust-tint); color:var(--rust);}
+.badge.partial{background:var(--gold-tint); color:var(--gold);}
+.badge.empty{background:var(--green-tint); color:var(--green);}
+.badge.occupied{background:var(--paper-alt); color:var(--ink-soft);}
+
+.empty-state{
+  text-align:center; padding:44px 20px; color:var(--ink-soft);
+}
+.empty-state svg{width:40px;height:40px;color:var(--ink-faint); margin-bottom:10px;}
+.empty-state p{margin:4px 0 16px; font-size:13.5px;}
+
+/* ============ SEAT KEY-TAGS (signature element) ============ */
+.room-block{margin-bottom:18px;}
+.room-block h3{font-size:13.5px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); margin-bottom:8px; font-weight:600;}
+.tag-grid{display:flex; flex-wrap:wrap; gap:10px;}
+.key-tag{
+  width:60px; position:relative; padding-top:9px; cursor:pointer; border:none; background:none;
+  display:flex; flex-direction:column; align-items:center;
+}
+.key-tag .plate{
+  width:60px; height:68px; border-radius:10px; border:1.5px solid var(--border);
+  background:var(--green-tint); display:flex; flex-direction:column; align-items:center; justify-content:center;
+  position:relative;
+}
+.key-tag .hole{
+  position:absolute; top:-6px; left:50%; transform:translateX(-50%);
+  width:11px;height:11px;border-radius:50%; background:var(--paper); border:1.5px solid var(--border);
+}
+.key-tag.occupied .plate{background:var(--paper-alt);}
+.key-tag .init{font-family:var(--font-display); font-weight:700; font-size:17px; color:var(--ink);}
+.key-tag.occupied .init{color:var(--orchid-fg);}
+.key-tag .lbl{font-family:var(--font-mono); font-size:10px; color:var(--ink-soft); margin-top:5px;}
+.key-tag .due-dot{position:absolute; bottom:6px; right:6px; width:7px;height:7px;border-radius:50%; background:var(--rust);}
+.key-tag.seat-hit .plate{box-shadow:0 0 0 2.5px var(--orchid); animation:hitpulse 1.6s ease-in-out infinite;}
+@keyframes hitpulse{0%,100%{box-shadow:0 0 0 2.5px var(--orchid);} 50%{box-shadow:0 0 0 4px var(--orchid);}}
+
+/* ============ FORMS ============ */
+.field{margin-bottom:14px;}
+.field label{display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;}
+.field input, .field select, .field textarea{
+  width:100%; padding:11px 12px; border-radius:11px; border:1.5px solid var(--border);
+  background:var(--card); font-size:14.5px; outline:none;
+}
+.field input:focus, .field select:focus, .field textarea:focus{border-color:var(--orchid);}
+.field-row{display:flex; gap:10px;}
+.field-row .field{flex:1; min-width:0;}
+.help{font-size:11.5px; color:var(--ink-faint); margin-top:5px;}
+
+.btn{
+  border:none; border-radius:12px; padding:12px 16px; font-weight:600; font-size:14px;
+  display:inline-flex; align-items:center; justify-content:center; gap:7px; width:100%;
+}
+.btn-primary{background:var(--orchid); color:#fff;}
+.btn-primary:active{background:var(--orchid-deep);}
+.btn-ghost{background:var(--paper-alt); color:var(--ink);}
+.btn-outline{background:none; border:1.5px solid var(--border); color:var(--ink);}
+.btn-danger{background:var(--rust-tint); color:var(--rust);}
+.btn-sm{width:auto; padding:8px 13px; font-size:12.5px; border-radius:10px;}
+.btn-row{display:flex; gap:8px; margin-top:16px;}
+.btn-row .btn{flex:1;}
+.btn:disabled{opacity:.5;}
+
+.topline{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
+.iconbtn{background:var(--paper-alt); border:none; width:36px;height:36px;border-radius:50%; display:flex;align-items:center;justify-content:center; flex:none;}
+.iconbtn svg{width:18px;height:18px;}
+.searchbar{display:flex; align-items:center; gap:8px; background:var(--card); border:1.5px solid var(--border); border-radius:12px; padding:9px 12px; margin-bottom:14px;}
+.searchbar svg{width:16px;height:16px; color:var(--ink-faint); flex:none;}
+.searchbar input{border:none; outline:none; background:none; width:100%; font-size:14px;}
+.chip-row{display:flex; gap:6px; overflow-x:auto; margin-bottom:14px; padding-bottom:2px;}
+.chip{
+  font-size:12px; font-weight:600; padding:7px 13px; border-radius:var(--radius-pill); border:1.5px solid var(--border);
+  background:var(--card); color:var(--ink-soft); white-space:nowrap; flex:none;
+}
+.chip.active{background:var(--orchid); border-color:var(--orchid); color:#fff;}
+
+.seg-row{display:flex; background:var(--paper-alt); border-radius:12px; padding:3px; gap:3px;}
+.seg-btn{flex:1; border:none; background:none; padding:9px 6px; border-radius:9px; font-size:12.5px; font-weight:600; color:var(--ink-soft); display:flex; align-items:center; justify-content:center; gap:5px;}
+.seg-btn svg{width:14px;height:14px;}
+.seg-btn.active{background:var(--card); color:var(--orchid-fg); box-shadow:0 1px 3px rgba(0,0,0,.1);}
+
+/* ============ SHEET / MODAL ============ */
+.sheet-overlay{position:fixed; inset:0; z-index:50; background:rgba(36,27,44,.45); display:flex; align-items:flex-end; justify-content:center;}
+.sheet{
+  width:100%; max-width:480px; background:var(--paper); border-radius:20px 20px 0 0;
+  padding:18px 18px calc(18px + env(safe-area-inset-bottom)); max-height:85vh; overflow-y:auto;
+  animation:sheetup .22s ease-out;
+}
+@keyframes sheetup{from{transform:translateY(24px); opacity:.4;} to{transform:translateY(0); opacity:1;}}
+.sheet-handle{width:36px;height:4px;background:var(--border); border-radius:2px; margin:0 auto 14px;}
+.sheet h3{font-size:16px; margin-bottom:14px;}
+
+.toast{
+  position:fixed; left:50%; bottom:96px; transform:translateX(-50%); z-index:80;
+  background:var(--toast-bg); color:#fff; padding:11px 18px; border-radius:var(--radius-pill); font-size:13px;
+  box-shadow:var(--shadow); max-width:86%; text-align:center;
+}
+
+/* ============ VOICE MODAL ============ */
+.voice-modal{position:fixed; inset:0; z-index:60; background:rgba(36,27,44,.72); display:flex; align-items:center; justify-content:center; padding:20px;}
+.voice-card{
+  width:100%; max-width:400px; background:var(--paper); border-radius:22px; padding:26px 22px; text-align:center;
+}
+.voice-orb{
+  width:76px;height:76px;border-radius:50%; margin:0 auto 16px;
+  background:linear-gradient(155deg,var(--orchid),var(--orchid-deep)); display:flex;align-items:center;justify-content:center;color:#fff;
+}
+.voice-orb svg{width:30px;height:30px;}
+.voice-orb.listening{animation:pulse 1.4s ease-in-out infinite;}
+.voice-status{font-weight:600; margin-bottom:6px;}
+.voice-transcript{font-size:14.5px; color:var(--ink-soft); min-height:20px; margin-bottom:14px;}
+.voice-reply{background:var(--paper-alt); border-radius:14px; padding:13px; font-size:14px; text-align:left; margin-bottom:14px; max-height:180px; overflow-y:auto;}
+.voice-type-row{display:flex; gap:8px;}
+.voice-type-row input{flex:1; padding:11px 12px; border-radius:11px; border:1.5px solid var(--border); font-size:14px;}
+
+/* ============ ATTACHMENTS ============ */
+.att-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border);}
+.att-row:last-child{border-bottom:none;}
+.att-icon{width:32px;height:32px;border-radius:8px;background:var(--paper-alt); display:flex;align-items:center;justify-content:center; flex:none;}
+.att-icon svg{width:16px;height:16px;color:var(--ink-soft);}
+.att-name{flex:1; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+/* lock screen */
+.lock-screen, .signin-screen{
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+  max-width:480px; margin:0 auto; background:var(--paper);
+}
+.lock-box, .signin-box{width:100%; max-width:320px; text-align:center;}
+.pin-dots{display:flex; gap:12px; justify-content:center; margin:22px 0;}
+.pin-dot{width:14px;height:14px;border-radius:50%; border:1.5px solid var(--orchid); }
+.pin-dot.filled{background:var(--orchid);}
+.pin-pad{display:flex; flex-wrap:wrap; gap:10px;}
+.pin-pad button{flex:1 1 calc(33.333% - 7px); min-width:70px;}
+.pin-pad button{padding:16px; border-radius:14px; border:1.5px solid var(--border); background:var(--card); font-size:18px; font-weight:600;}
+</style>
+</head>
+<body>
+
+<div id="lock-screen" class="lock-screen hidden">
+  <div class="lock-box">
+    <h2 style="margin-bottom:6px;">Enter PIN</h2>
+    <p class="muted" style="font-size:13px;">Orchid Hostel is locked</p>
+    <div class="pin-dots" id="pin-dots"></div>
+    <div class="pin-pad" id="pin-pad"></div>
+  </div>
+</div>
+
+<div id="signin-screen" class="signin-screen hidden">
+  <div class="signin-box">
+    <h2 style="margin-bottom:6px;">Sign in</h2>
+    <p class="muted" style="font-size:13px; margin-bottom:18px;">Cloud sync is on for this hostel. Sign in with the admin account to continue.</p>
+    <div class="field"><label>Email</label><input id="si-email" type="email" autocomplete="username" /></div>
+    <div class="field"><label>Password</label><input id="si-pass" type="password" autocomplete="current-password" /></div>
+    <div id="si-error" class="muted" style="color:var(--rust); font-size:12.5px; margin-bottom:8px;"></div>
+    <div class="btn-row">
+      <button class="btn btn-outline" id="si-create">Create account</button>
+      <button class="btn btn-primary" id="si-signin">Sign in</button>
+    </div>
+    <button class="link-btn" id="si-use-local" style="margin-top:14px;">Use offline mode on this device instead</button>
+  </div>
+</div>
+
+<div id="app" class="app-frame hidden">
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="12" fill="#A6337B"/><path d="M13 6c1.2 1.6 1.2 3.4 0 5-1.2-1.6-1.2-3.4 0-5Z" fill="#F6D97A"/><path d="M13 21c-1.2-1.6-1.2-3.4 0-5 1.2 1.6 1.2 3.4 0 5Z" fill="#F6D97A"/><path d="M6 13c1.6-1.2 3.4-1.2 5 0-1.6 1.2-3.4 1.2-5 0Z" fill="#F6D97A"/><path d="M20 13c-1.6 1.2-3.4 1.2-5 0 1.6-1.2 3.4-1.2 5 0Z" fill="#F6D97A"/><circle cx="13" cy="13" r="2.1" fill="#FBF7F5"/></svg>
+      <span class="brand-name" id="brand-name">Orchid Hostel</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+        <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </button>
+      <button class="sync-pill" id="sync-pill"><span class="dot"></span><span id="sync-label">Local</span></button>
+    </div>
+  </header>
+
+  <main id="view-root" class="view-root"></main>
+
+  <button class="mic-btn" id="mic-btn" aria-label="Voice command">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v3"/></svg>
+  </button>
+
+  <nav class="tabbar" id="tabbar">
+    <button class="tab active" data-view="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
+      Home<span class="tab-dot"></span>
+    </button>
+    <button class="tab" data-view="residents">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c1-3.6 3.3-5.4 5.5-5.4s4.5 1.8 5.5 5.4"/><circle cx="17" cy="8.5" r="2.4"/><path d="M15.8 14.8c2 .3 3.6 2 4.3 4.6"/></svg>
+      Residents<span class="tab-dot"></span>
+    </button>
+    <button class="tab" data-view="seats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="7" height="7" rx="1.5"/><rect x="13" y="3" width="7" height="7" rx="1.5"/><rect x="4" y="14" width="7" height="7" rx="1.5"/><rect x="13" y="14" width="7" height="7" rx="1.5"/></svg>
+      Seats<span class="tab-dot"></span>
+    </button>
+    <button class="tab" data-view="dues">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>
+      Dues<span class="tab-dot"></span>
+    </button>
+    <button class="tab" data-view="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.7 7.7 0 0 0 0-3l1.9-1.5-2-3.4-2.2.9a7.6 7.6 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.5a7.6 7.6 0 0 0-2.6 1.5l-2.2-.9-2 3.4L4.6 10.5a7.7 7.7 0 0 0 0 3L2.7 15l2 3.4 2.2-.9c.8.7 1.6 1.2 2.6 1.5l.5 2.5h4l.5-2.5a7.6 7.6 0 0 0 2.6-1.5l2.2.9 2-3.4-1.9-1.5Z"/></svg>
+      Settings<span class="tab-dot"></span>
+    </button>
+  </nav>
+</div>
+
+<div id="sheet-overlay" class="sheet-overlay hidden"></div>
+<div id="toast" class="toast hidden"></div>
+<div id="voice-modal" class="voice-modal hidden"></div>
+
+<script type="module">
+/* =====================================================================
+   ORCHID HOSTEL — app.js (inlined)
+   Vanilla JS PWA. Works fully offline with localStorage ("Local mode").
+   If Firebase config + sign-in are added in Settings, it syncs to the
+   cloud ("Cloud mode") instead, so data survives reinstalls and can be
+   shared across devices/staff.
+   ===================================================================== */
+
+/* ---------- small utils ---------- */
+const $ = (sel, el=document) => el.querySelector(sel);
+const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = (p='id') => p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+const todayISO = () => new Date().toISOString().slice(0,10);
+const monthKey = (d=new Date()) => d.toISOString().slice(0,7);
+const monthLabel = (mk) => { const [y,m] = mk.split('-'); return new Date(+y, +m-1, 1).toLocaleString(undefined,{month:'long', year:'numeric'}); };
+function fmtMoney(n){ const s = (Math.round((n||0)*100)/100).toLocaleString(); return s; }
+function toast(msg, ms=2600){
+  const t = $('#toast'); t.textContent = msg; t.classList.remove('hidden');
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.add('hidden'), ms);
+}
+function initials(name){
+  return (name||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+
+/* ---------- local storage keys ---------- */
+const LS = {
+  residents:'orchid_residents', seats:'orchid_seats', payments:'orchid_payments',
+  settings:'orchid_settings', fbConfig:'orchid_firebase_config', geminiKey:'orchid_gemini_key',
+  pin:'orchid_pin', localUnlocked:'orchid_local_unlocked', theme:'orchid_theme'
+};
+function lsGet(k, fb){ try{ const v = localStorage.getItem(k); return v===null ? fb : JSON.parse(v); }catch(e){ return fb; } }
+function lsSet(k, v){ localStorage.setItem(k, JSON.stringify(v)); }
+function defaultSettings(){ return { hostelName:'Orchid Hostel', currency:'৳', lastGeneratedMonth:'', voiceLang:'en-US' }; }
+
+/* ---------- theme (light / dark / system) ---------- */
+const SUN_PATH = '<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.9 19.1l1.7-1.7M17.4 6.6l1.7-1.7"/>';
+const MOON_PATH = '<path d="M21 13.2A9 9 0 1 1 10.8 3 7.2 7.2 0 0 0 21 13.2Z"/>';
+function effectiveTheme(pref){
+  if (pref==='dark' || pref==='light') return pref;
+  return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+}
+function applyTheme(){
+  const pref = lsGet(LS.theme, 'dark');
+  const eff = effectiveTheme(pref);
+  document.documentElement.setAttribute('data-theme', eff);
+  const icon = $('#theme-icon');
+  if (icon) icon.innerHTML = eff==='dark' ? MOON_PATH : SUN_PATH;
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) metaTheme.setAttribute('content', eff==='dark' ? '#1B1620' : '#A6337B');
+}
+function toggleTheme(){
+  const eff = effectiveTheme(lsGet(LS.theme, 'dark'));
+  lsSet(LS.theme, eff==='dark' ? 'light' : 'dark');
+  applyTheme();
+}
+if (window.matchMedia){
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  const onSchemeChange = () => { if (lsGet(LS.theme, 'dark')==='system') applyTheme(); };
+  try{
+    if (mq.addEventListener) mq.addEventListener('change', onSchemeChange);
+    else if (mq.addListener) mq.addListener(onSchemeChange); // older WebView fallback
+  }catch(e){ /* non-fatal: theme just won't live-update if OS theme changes mid-session */ }
+}
+
+/* ---------- cloud (Firebase) state, lazily initialised ---------- */
+const FB_VER = '12.17.1';
+let cloud = null;      // {app, db, auth, fx:{...}, ax:{...}} — no Firebase Storage (needs a billing card)
+let currentUser = null;
+let settingsCache = null;
+
+async function initCloud(){
+  const cfg = lsGet(LS.fbConfig, null);
+  if (!cfg){ cloud = null; return; }
+  try{
+    // Note: deliberately NOT using Firebase Storage here — as of Feb 2026 it requires a
+    // linked billing card even for free-tier usage. Attachments are instead kept as small
+    // base64 blobs inside Firestore documents, so the whole stack needs zero card on file.
+    const [appMod, fsMod, authMod] = await Promise.all([
+      import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-app.js`),
+      import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-firestore.js`),
+      import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-auth.js`)
+    ]);
+    const app = appMod.initializeApp(cfg);
+    cloud = {
+      app,
+      db: fsMod.getFirestore(app),
+      auth: authMod.getAuth(app),
+      fx: { collection:fsMod.collection, doc:fsMod.doc, getDoc:fsMod.getDoc, getDocs:fsMod.getDocs, setDoc:fsMod.setDoc, deleteDoc:fsMod.deleteDoc },
+      ax: { onAuthStateChanged:authMod.onAuthStateChanged, signIn:authMod.signInWithEmailAndPassword, signUp:authMod.createUserWithEmailAndPassword, signOut:authMod.signOut }
+    };
+  }catch(err){
+    console.error('Firebase init failed', err);
+    toast('Could not connect to Firebase — check the config in Settings.');
+    cloud = null;
+    throw err;
+  }
+}
+
+function waitForAuth(){
+  return new Promise((resolve) => {
+    if (!cloud){ resolve(null); return; }
+    const unsub = cloud.ax.onAuthStateChanged(cloud.auth, (u) => { unsub(); resolve(u); });
+  });
+}
+
+/* ---------- data access layer: same API for local or cloud mode ---------- */
+const DB = {
+  async listResidents(){
+    if (cloud){ const snap = await cloud.fx.getDocs(cloud.fx.collection(cloud.db,'residents')); return snap.docs.map(d=>({id:d.id, ...d.data()})); }
+    return lsGet(LS.residents, []);
+  },
+  async saveResident(r){
+    if (!r.id) r.id = uid('res');
+    if (cloud){ await cloud.fx.setDoc(cloud.fx.doc(cloud.db,'residents',r.id), r); }
+    else{ const list = lsGet(LS.residents, []); const i = list.findIndex(x=>x.id===r.id); if(i>=0) list[i]=r; else list.push(r); lsSet(LS.residents, list); }
+    return r;
+  },
+  async deleteResident(id){
+    if (cloud){ await cloud.fx.deleteDoc(cloud.fx.doc(cloud.db,'residents',id)); }
+    else{ lsSet(LS.residents, lsGet(LS.residents,[]).filter(x=>x.id!==id)); }
+  },
+  async listSeats(){
+    if (cloud){ const snap = await cloud.fx.getDocs(cloud.fx.collection(cloud.db,'seats')); return snap.docs.map(d=>({id:d.id, ...d.data()})); }
+    return lsGet(LS.seats, []);
+  },
+  async saveSeat(s){
+    if (cloud){ await cloud.fx.setDoc(cloud.fx.doc(cloud.db,'seats',s.id), s); }
+    else{ const list = lsGet(LS.seats, []); const i = list.findIndex(x=>x.id===s.id); if(i>=0) list[i]=s; else list.push(s); lsSet(LS.seats, list); }
+    return s;
+  },
+  async saveSeats(arr){ for (const s of arr) await this.saveSeat(s); },
+  async deleteSeat(id){
+    if (cloud){ await cloud.fx.deleteDoc(cloud.fx.doc(cloud.db,'seats',id)); }
+    else{ lsSet(LS.seats, lsGet(LS.seats,[]).filter(x=>x.id!==id)); }
+  },
+  async listPayments(){
+    if (cloud){ const snap = await cloud.fx.getDocs(cloud.fx.collection(cloud.db,'payments')); return snap.docs.map(d=>({id:d.id, ...d.data()})); }
+    return lsGet(LS.payments, []);
+  },
+  async savePayment(p){
+    if (!p.id) p.id = uid('pay');
+    if (cloud){ await cloud.fx.setDoc(cloud.fx.doc(cloud.db,'payments',p.id), p); }
+    else{ const list = lsGet(LS.payments, []); const i = list.findIndex(x=>x.id===p.id); if(i>=0) list[i]=p; else list.push(p); lsSet(LS.payments, list); }
+    return p;
+  },
+  async settings(){
+    if (settingsCache) return settingsCache;
+    if (cloud){ const snap = await cloud.fx.getDoc(cloud.fx.doc(cloud.db,'meta','settings')); settingsCache = snap.exists() ? {...defaultSettings(), ...snap.data()} : defaultSettings(); }
+    else{ settingsCache = {...defaultSettings(), ...lsGet(LS.settings, {})}; }
+    return settingsCache;
+  },
+  async saveSettings(patch){
+    const s = {...(await this.settings()), ...patch};
+    settingsCache = s;
+    if (cloud){ await cloud.fx.setDoc(cloud.fx.doc(cloud.db,'meta','settings'), s, {merge:true}); }
+    else{ lsSet(LS.settings, s); }
+    return s;
+  },
+  async uploadFile(file, residentId){
+    // Files are kept as base64 inside the database itself (Firestore doc or localStorage) —
+    // there's no separate file storage service, so keep files small (a photo of an ID, not a
+    // full-res scan). Cloud mode enforces a stricter cap because a Firestore document maxes
+    // out at 1MB total including every field on it.
+    const maxBytes = cloud ? 700*1024 : 4*1024*1024;
+    if (file.size > maxBytes){
+      throw new Error(`That file is too big (${Math.round(file.size/1024)}KB). Keep attachments under ${Math.round(maxBytes/1024)}KB — try a compressed photo instead.`);
+    }
+    const dataUrl = await new Promise((resolve,reject)=>{ const fr = new FileReader(); fr.onload=()=>resolve(fr.result); fr.onerror=reject; fr.readAsDataURL(file); });
+    return { id: uid('att'), name:file.name, url:dataUrl, uploadedAt: new Date().toISOString() };
+  }
+};
+
+/* ---------- app state ---------- */
+const state = { view:'dashboard', residents:[], seats:[], payments:[], settings:defaultSettings(), residentFilter:'all', seatFilter:'all', seatSortMode:'empty', _seatSearch:'', _pendingAttachments:[] };
+const TRASH_DAYS = 40;
+
+async function loadAll(){
+  [state.residents, state.seats, state.payments, state.settings] = await Promise.all([
+    DB.listResidents(), DB.listSeats(), DB.listPayments(), DB.settings()
+  ]);
+  $('#brand-name').textContent = state.settings.hostelName || 'Orchid Hostel';
+  if (!state.seats.length){
+    await seedDefaultRooms();
+    state.seats = await DB.listSeats();
+  }
+  await purgeExpiredTrash();
+}
+
+/* Residents that should show up anywhere in normal use — trashed ones are hidden everywhere
+   except the Trash screen itself, but their data stays in state.residents (and in the
+   database) until purgeExpiredTrash removes them for good after TRASH_DAYS. */
+function visibleResidents(){ return state.residents.filter(r => !r.deletedAt); }
+function trashedResidents(){ return state.residents.filter(r => !!r.deletedAt); }
+function daysLeftInTrash(r){
+  const ms = TRASH_DAYS*86400000 - (Date.now() - new Date(r.deletedAt).getTime());
+  return Math.max(0, Math.ceil(ms/86400000));
+}
+async function softDeleteResident(id){
+  const r = state.residents.find(x=>x.id===id);
+  if (!r) return;
+  const seat = residentSeat(id);
+  if (seat) await DB.saveSeat({...seat, status:'empty', residentId:null});
+  r.deletedAt = new Date().toISOString();
+  await DB.saveResident(r);
+}
+async function restoreResident(id){
+  const r = state.residents.find(x=>x.id===id);
+  if (!r) return;
+  r.deletedAt = null;
+  await DB.saveResident(r);
+}
+async function purgeExpiredTrash(){
+  const cutoff = Date.now() - TRASH_DAYS*86400000;
+  const expired = state.residents.filter(r => r.deletedAt && new Date(r.deletedAt).getTime() <= cutoff);
+  for (const r of expired){ await DB.deleteResident(r.id); }
+  if (expired.length) state.residents = state.residents.filter(r => !expired.find(e=>e.id===r.id));
+}
+
+function currentMonthPayment(residentId, mk = monthKey()){
+  return state.payments.find(p => p.residentId === residentId && p.month === mk);
+}
+function residentDueStatus(residentId){
+  const p = currentMonthPayment(residentId);
+  if (!p) return 'due';
+  if (p.status === 'paid') return 'paid';
+  if (p.status === 'partial') return 'partial';
+  return 'due';
+}
+function residentSeat(residentId){ return state.seats.find(s => s.residentId === residentId); }
+function visibleResidentIdSet(){ return new Set(visibleResidents().map(r=>r.id)); }
+function totalDueAmount(mk = monthKey()){
+  const ids = visibleResidentIdSet();
+  return state.payments.filter(p=>p.month===mk && ids.has(p.residentId)).reduce((sum,p)=> sum + Math.max(0,(p.amountDue||0)-(p.amountPaid||0)), 0);
+}
+function monthTotals(mk = monthKey()){
+  const ids = visibleResidentIdSet();
+  const list = state.payments.filter(p=>p.month===mk && ids.has(p.residentId));
+  const totalDue = list.reduce((s,p)=>s+(p.amountDue||0),0);
+  const collected = list.reduce((s,p)=>s+(p.amountPaid||0),0);
+  return { totalDue, collected, outstanding: Math.max(0, totalDue-collected) };
+}
+function progressRingSVG({collected, totalDue, currency, size=152}){
+  const r = size/2 - 12, c = 2*Math.PI*r, cx = size/2, cy = size/2;
+  const pct = totalDue>0 ? Math.min(1, collected/totalDue) : (collected>0 ? 1 : 0);
+  const offset = c * (1-pct);
+  return `
+    <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" style="display:block;">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--paper-alt)" stroke-width="12"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--orchid)" stroke-width="12"
+        stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}"
+        transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dashoffset .4s ease;"/>
+      <text x="${cx}" y="${cy-4}" text-anchor="middle" font-family="'Fraunces',serif" font-weight="700"
+        font-size="${size*0.145}" fill="var(--ink)">${esc(currency)}${fmtMoney(collected)}</text>
+      <text x="${cx}" y="${cy+18}" text-anchor="middle" font-family="'IBM Plex Mono',monospace"
+        font-size="${size*0.06}" fill="var(--ink-soft)">received</text>
+    </svg>`;
+}
+
+/* ---------- rendering: dashboard ---------- */
+function renderDashboard(){
+  const mk = monthKey();
+  const seatsTotal = state.seats.length;
+  const seatsOccupied = state.seats.filter(s=>s.residentId).length;
+  const seatsEmpty = seatsTotal - seatsOccupied;
+  const active = visibleResidents().filter(r=>r.status!=='left');
+  const dueList = active.filter(r => residentDueStatus(r.id) !== 'paid');
+  const totalDue = totalDueAmount(mk);
+  const cur = state.settings.currency;
+  const totals = monthTotals(mk);
+
+  return `
+    <div class="section-title"><h2>Overview</h2><span class="faint mono" style="font-size:11.5px;">${esc(monthLabel(mk))}</span></div>
+    <div class="stat-grid">
+      <div class="stat-card accent-orchid">
+        <div class="eyebrow">Total due</div>
+        <div class="big-num">${esc(cur)}${fmtMoney(totalDue)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="eyebrow">Residents</div>
+        <div class="big-num">${active.length}</div>
+      </div>
+      <div class="stat-card">
+        <div class="eyebrow">Seats empty</div>
+        <div class="big-num" style="color:var(--green)">${seatsEmpty}</div>
+      </div>
+      <div class="stat-card">
+        <div class="eyebrow">Seats occupied</div>
+        <div class="big-num">${seatsOccupied}<span class="faint" style="font-size:15px;">/${seatsTotal}</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="display:flex; flex-direction:column; align-items:center; padding:20px 16px;">
+      <div class="eyebrow" style="align-self:flex-start; margin-bottom:6px;">Money received this cycle</div>
+      ${progressRingSVG({collected:totals.collected, totalDue:totals.totalDue, currency:cur})}
+      <div class="muted" style="font-size:12.5px; margin-top:8px;">
+        ${totals.totalDue>0 ? `of ${esc(cur)}${fmtMoney(totals.totalDue)} expected this month` : 'No dues generated yet this month'}
+      </div>
+    </div>
+
+    <div class="section-title"><h2>Residents with dues</h2><button class="link-btn" data-nav="dues">See all</button></div>
+    ${dueList.length===0 ? emptyState('check','All caught up','No pending dues this month.') :
+      `<div class="card" style="padding:4px 12px;">${dueList.slice(0,5).map(r=>residentRow(r)).join('')}</div>`}
+
+    <div class="section-title"><h2>Quick actions</h2></div>
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn btn-ghost" data-nav="residentForm">＋ Add resident</button>
+    </div>
+  `;
+}
+
+function emptyState(icon, title, sub){
+  const icons = {
+    check:'<path d="M20 6 9 17l-5-5"/>',
+    users:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c1-3.6 3.3-5.4 5.5-5.4s4.5 1.8 5.5 5.4"/>',
+    door:'<rect x="5" y="3" width="14" height="18" rx="1.5"/><circle cx="14.5" cy="12" r="1"/>'
+  };
+  return `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icons[icon]||icons.check}</svg><p>${esc(sub)}</p></div>`;
+}
+
+function residentRow(r){
+  const st = residentDueStatus(r.id);
+  const seat = residentSeat(r.id);
+  return `<div class="list-row" data-open-resident="${r.id}" style="cursor:pointer;">
+    <div class="avatar">${esc(initials(r.name))}</div>
+    <div class="row-main">
+      <div class="row-title">${esc(r.name)}</div>
+      <div class="row-sub">${seat ? esc(seat.room)+' · Seat '+esc(seat.seatLabel) : 'No seat assigned'}</div>
+    </div>
+    <span class="badge ${st}">${st==='paid'?'Paid':st==='partial'?'Partial':'Due'}</span>
+  </div>`;
+}
+
+/* ---------- rendering: residents list ---------- */
+function renderResidents(){
+  const q = (state._residentSearch||'').toLowerCase();
+  let list = visibleResidents().slice().sort((a,b)=>a.name.localeCompare(b.name));
+  if (state.residentFilter==='due') list = list.filter(r=>residentDueStatus(r.id)!=='paid' && r.status!=='left');
+  if (state.residentFilter==='paid') list = list.filter(r=>residentDueStatus(r.id)==='paid');
+  if (state.residentFilter==='active') list = list.filter(r=>r.status!=='left');
+  if (state.residentFilter==='left') list = list.filter(r=>r.status==='left');
+  if (q) list = list.filter(r=> (r.name||'').toLowerCase().includes(q) || (r.phone||'').includes(q) || (residentSeat(r.id)?.room||'').toLowerCase().includes(q));
+  const trashCount = trashedResidents().length;
+
+  return `
+    <div class="section-title"><h2>Residents</h2><button class="btn btn-primary btn-sm" data-nav="residentForm">＋ Add</button></div>
+    <div class="searchbar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="resident-search" placeholder="Search by name, phone, or room no." value="${esc(state._residentSearch||'')}" />
+    </div>
+    <div class="chip-row">
+      ${['all','active','due','paid','left'].map(f=>`<button class="chip ${state.residentFilter===f?'active':''}" data-rfilter="${f}">${f[0].toUpperCase()+f.slice(1)}</button>`).join('')}
+    </div>
+    ${q && list.length>0 ? `<div class="faint mono" style="font-size:11px; margin:-6px 0 10px;">${list.length} match${list.length===1?'':'es'} — room, name, or phone containing "${esc(state._residentSearch)}"</div>` : ''}
+    ${list.length===0 ? emptyState('users','No residents yet','Add your first resident to get started.') :
+      `<div class="card" style="padding:4px 12px;">${list.map(r=>residentRow(r)).join('')}</div>`}
+    ${trashCount>0 ? `<div style="text-align:center; margin-top:16px;"><button class="link-btn" data-nav="trash">🗑 Trash (${trashCount})</button></div>` : ''}
+  `;
+}
+
+/* ---------- rendering: resident detail ---------- */
+function renderResidentDetail(id){
+  const r = state.residents.find(x=>x.id===id);
+  if (!r) return emptyState('users','Not found','This resident no longer exists.');
+  const seat = residentSeat(r.id);
+  const cur = state.settings.currency;
+  const history = state.payments.filter(p=>p.residentId===id).sort((a,b)=>b.month.localeCompare(a.month));
+  const atts = r.attachments || [];
+
+  return `
+    <div class="topline">
+      <button class="iconbtn" data-nav="residents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <h2 style="font-size:17px;">${esc(r.name)}</h2>
+    </div>
+
+    <div class="card">
+      <div class="row-sub" style="margin-bottom:10px;">
+        ${seat ? `<span class="badge occupied">${esc(seat.room)} · Seat ${esc(seat.seatLabel)}</span>` : `<span class="badge due">No seat</span>`}
+        <span class="badge ${residentDueStatus(r.id)}" style="margin-left:6px;">${residentDueStatus(r.id)==='paid'?'Paid this month':residentDueStatus(r.id)==='partial'?'Partial due':'Due this month'}</span>
+      </div>
+      ${detailLine('Phone', r.phone)} ${detailLine('Email', r.email)} ${detailLine('NID / Passport', r.nid)}
+      ${detailLine('Monthly rent', r.monthlyRent ? cur+fmtMoney(r.monthlyRent) : '')}
+      ${detailLine('Guardian', [r.guardianName, r.guardianPhone].filter(Boolean).join(' · '))}
+      ${detailLine('Address', r.address)}
+      ${detailLine('Occupation / Institution', r.occupation)}
+      ${detailLine('Joined', r.joinDate)}
+      ${r.notes ? detailLine('Notes', r.notes) : ''}
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-record-payment">Record payment</button>
+      <button class="btn btn-ghost" data-nav="residentForm" data-id="${r.id}">Edit</button>
+    </div>
+
+    <div class="section-title"><h2>Payment history</h2></div>
+    ${history.length===0 ? emptyState('check','No payments yet','') :
+      `<div class="card" style="padding:4px 12px;">${history.map(p=>`
+        <div class="list-row">
+          <div class="row-main"><div class="row-title mono" style="font-weight:600;">${esc(monthLabel(p.month))}</div>
+          <div class="row-sub">${cur}${fmtMoney(p.amountPaid||0)} of ${cur}${fmtMoney(p.amountDue||0)}</div></div>
+          <span class="badge ${p.status}">${p.status}</span>
+        </div>`).join('')}</div>`}
+
+    <div class="section-title"><h2>Attachments</h2><label class="link-btn" style="cursor:pointer;">＋ Upload<input type="file" id="att-input" class="hidden" /></label></div>
+    ${atts.length===0 ? emptyState('check','No files yet','Upload a photo ID, biodata form, or agreement.') :
+      `<div class="card">${atts.map(a=>`
+        <div class="att-row">
+          <div class="att-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2v6h6"/><path d="M6 2h8l6 6v14H6z"/></svg></div>
+          <div class="att-name">${esc(a.name)}</div>
+          <a href="${a.url}" target="_blank" rel="noopener" class="link-btn">View</a>
+          <button class="link-btn" data-del-att="${a.id}" style="color:var(--rust);">Remove</button>
+        </div>`).join('')}</div>`}
+
+    <div class="btn-row">
+      <button class="btn btn-outline" id="btn-vacate">${seat ? 'Vacate seat' : 'Assign seat'}</button>
+      <button class="btn btn-danger" id="btn-delete-resident">Delete resident</button>
+    </div>
+    <div class="help" style="text-align:center; margin-top:8px;">Deleting frees their seat and moves them to Trash for ${TRASH_DAYS} days before permanent removal.</div>
+  `;
+}
+function detailLine(label, val){
+  if (!val) return '';
+  return `<div style="display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--border); font-size:13.5px;">
+    <span class="muted">${esc(label)}</span><span style="font-weight:500; text-align:right;">${esc(val)}</span></div>`;
+}
+
+/* ---------- rendering: trash ---------- */
+function renderTrash(){
+  const list = trashedResidents().slice().sort((a,b)=> new Date(b.deletedAt)-new Date(a.deletedAt));
+  return `
+    <div class="topline">
+      <button class="iconbtn" data-nav="residents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <h2 style="font-size:17px;">Trash</h2>
+    </div>
+    <p class="muted" style="font-size:12.5px; margin:-8px 0 14px;">Deleted residents stay here for ${TRASH_DAYS} days in case it was a mistake, then are removed for good.</p>
+    ${list.length===0 ? emptyState('check','Trash is empty','') :
+      `<div class="card" style="padding:4px 12px;">${list.map(r=>`
+        <div class="list-row">
+          <div class="avatar">${esc(initials(r.name))}</div>
+          <div class="row-main"><div class="row-title">${esc(r.name)}</div>
+          <div class="row-sub">${daysLeftInTrash(r)} day${daysLeftInTrash(r)===1?'':'s'} left</div></div>
+          <button class="link-btn" data-restore="${r.id}">Restore</button>
+          <button class="link-btn" data-purge="${r.id}" style="color:var(--rust);">Delete now</button>
+        </div>`).join('')}</div>`}
+  `;
+}
+
+/* ---------- rendering: resident form (add/edit) ---------- */
+function renderResidentForm(id){
+  const r = id ? state.residents.find(x=>x.id===id) : null;
+  const currentSeat = r ? residentSeat(r.id) : null;
+  const roomNames = [...new Set(state.seats.map(s=>s.room))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  const emptyCount = room => state.seats.filter(s=>s.room===room && !s.residentId).length;
+  const roomOptions = roomNames.map(room => {
+    const n = emptyCount(room);
+    const isCurrent = currentSeat && currentSeat.room===room;
+    return `<option value="${esc(room)}" ${isCurrent?'selected':''}>${esc(room)} (${n} empty${isCurrent?', incl. current':''})</option>`;
+  }).join('');
+
+  return `
+    <div class="topline">
+      <button class="iconbtn" data-nav="${id?'residentDetail':'residents'}" data-id="${id||''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <h2 style="font-size:17px;">${r?'Edit resident':'Add resident'}</h2>
+    </div>
+    <form id="resident-form">
+      <div class="field"><label>Full name *</label><input name="name" required value="${esc(r?.name||'')}" /></div>
+      <div class="field-row">
+        <div class="field"><label>Phone</label><input name="phone" value="${esc(r?.phone||'')}" /></div>
+        <div class="field"><label>Email</label><input name="email" type="email" value="${esc(r?.email||'')}" /></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Monthly rent (${esc(state.settings.currency)})</label><input name="monthlyRent" type="number" min="0" value="${r?.monthlyRent||''}" /></div>
+        <div class="field"><label>Join date</label><input name="joinDate" type="date" value="${r?.joinDate||todayISO()}" /></div>
+      </div>
+
+      <div class="field-row">
+        <div class="field"><label>Room no.</label>
+          <select id="rf-room" name="room">
+            <option value="">— No room —</option>
+            ${roomOptions}
+          </select>
+        </div>
+        <div class="field"><label>Seat</label>
+          <select id="rf-seat" name="seatLabel"><option value="">— Select room first —</option></select>
+        </div>
+      </div>
+      ${roomNames.length===0 ? `<div class="help" style="margin-top:-8px;">No rooms available yet.</div>` : ''}
+
+      <div class="field"><label>NID / Passport number</label><input name="nid" value="${esc(r?.nid||'')}" /></div>
+      <div class="field"><label>Present address</label><textarea name="address" rows="2">${esc(r?.address||'')}</textarea></div>
+      <div class="field-row">
+        <div class="field"><label>Guardian name</label><input name="guardianName" value="${esc(r?.guardianName||'')}" /></div>
+        <div class="field"><label>Guardian phone</label><input name="guardianPhone" value="${esc(r?.guardianPhone||'')}" /></div>
+      </div>
+      <div class="field"><label>Occupation / Institution</label><input name="occupation" value="${esc(r?.occupation||'')}" /></div>
+      <div class="field"><label>Notes</label><textarea name="notes" rows="2">${esc(r?.notes||'')}</textarea></div>
+
+      <div class="field">
+        <label>Attachments</label>
+        <label class="btn btn-outline btn-sm" style="cursor:pointer; display:inline-flex;">＋ Upload file
+          <input type="file" id="rf-att-input" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/*" class="hidden" />
+        </label>
+        <div id="rf-att-list" style="margin-top:8px;">${renderPendingAttachmentsList()}</div>
+        <div class="help">PDF, PNG, JPG or similar. Keep files modest in size — see Settings → Cloud sync for the limit.</div>
+      </div>
+
+      <button class="btn btn-primary" type="submit" style="margin-top:6px;">${r?'Save changes':'Add resident'}</button>
+    </form>
+  `;
+}
+function renderPendingAttachmentsList(){
+  const list = state._pendingAttachments || [];
+  if (list.length===0) return `<div class="faint" style="font-size:12.5px;">No files added yet.</div>`;
+  return list.map(a => `
+    <div class="att-row">
+      <div class="att-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2v6h6"/><path d="M6 2h8l6 6v14H6z"/></svg></div>
+      <div class="att-name">${esc(a.name)}</div>
+      <button class="link-btn" type="button" data-rm-pending-att="${a.id}" style="color:var(--rust);">Remove</button>
+    </div>`).join('');
+}
+
+/* ---------- rendering: seats ---------- */
+function renderSeats(){
+  const rooms = {};
+  state.seats.forEach(s => { (rooms[s.room] = rooms[s.room]||[]).push(s); });
+  let roomNames = Object.keys(rooms);
+  const mode = state.seatSortMode || 'empty';
+  const q = (state._seatSearch||'').toLowerCase().trim();
+
+  // search: which seats match, and which rooms contain a match
+  const matchedSeatIds = new Set();
+  if (q){
+    for (const s of state.seats){
+      const res = s.residentId ? state.residents.find(r=>r.id===s.residentId) : null;
+      const roomMatch = s.room.toLowerCase().includes(q);
+      const personMatch = res && (res.name.toLowerCase().includes(q) || (res.phone||'').includes(q));
+      if (roomMatch || personMatch) matchedSeatIds.add(s.id);
+    }
+    roomNames = roomNames.filter(name => rooms[name].some(s=>matchedSeatIds.has(s.id)));
+  }
+
+  const emptyCount = name => rooms[name].filter(s=>!s.residentId).length;
+  const occCount = name => rooms[name].filter(s=>s.residentId).length;
+  const numCompare = (a,b) => a.localeCompare(b,undefined,{numeric:true});
+  if (mode==='occupied') roomNames.sort((a,b)=> occCount(b)-occCount(a) || numCompare(a,b));
+  else if (mode==='floor') roomNames.sort((a,b)=> (parseFloat(rooms[a][0].floor)||0)-(parseFloat(rooms[b][0].floor)||0) || numCompare(a,b));
+  else if (mode==='bedType') roomNames.sort((a,b)=> (rooms[a][0].bedType||'zzz').localeCompare(rooms[b][0].bedType||'zzz') || numCompare(a,b));
+  else roomNames.sort((a,b)=> emptyCount(b)-emptyCount(a) || numCompare(a,b));
+
+  const tileSort = mode==='occupied'
+    ? (a,b)=> (b.residentId?1:0)-(a.residentId?1:0) || numCompare(a.seatLabel,b.seatLabel)
+    : (a,b)=> (a.residentId?1:0)-(b.residentId?1:0) || numCompare(a.seatLabel,b.seatLabel);
+
+  const sortChips = [
+    {id:'empty', label:'Empty first'}, {id:'occupied', label:'Occupied first'},
+    {id:'floor', label:'Floors'}, {id:'bedType', label:'Bed type'}
+  ];
+
+  return `
+    <div class="section-title"><h2>Seats</h2></div>
+    <div class="searchbar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="seat-search" placeholder="Search room no., name, or phone" value="${esc(state._seatSearch||'')}" />
+    </div>
+    <div class="chip-row">
+      ${sortChips.map(c=>`<button class="chip ${mode===c.id?'active':''}" data-seat-sort="${c.id}">${esc(c.label)}</button>`).join('')}
+    </div>
+    ${q && roomNames.length===0 ? emptyState('door','No matches','Nothing found for that search.') : ''}
+    ${roomNames.length===0 && !q ? emptyState('door','No rooms yet','Rooms will appear here once added.') :
+      roomNames.map(room => {
+        const meta = rooms[room][0];
+        const metaBits = [meta.floor ? `Floor ${esc(meta.floor)}` : null, meta.bedType ? esc(meta.bedType[0].toUpperCase()+meta.bedType.slice(1)) : null].filter(Boolean);
+        return `
+        <div class="room-block">
+          <h3>Room ${esc(room)}${metaBits.length?' · '+metaBits.join(' · '):''} · ${occCount(room)}/${rooms[room].length} occupied</h3>
+          <div class="tag-grid">
+            ${rooms[room].slice().sort(tileSort).map(s => {
+              const res = s.residentId ? state.residents.find(r=>r.id===s.residentId) : null;
+              const due = res && residentDueStatus(res.id)!=='paid';
+              const hit = q && matchedSeatIds.has(s.id);
+              return `<button class="key-tag ${s.residentId?'occupied':''} ${hit?'seat-hit':''}" data-seat="${s.id}">
+                <div class="plate"><div class="hole"></div>
+                  <span class="init">${res?esc(initials(res.name)):''}</span>
+                  ${due?'<span class="due-dot"></span>':''}
+                </div>
+                <span class="lbl">${esc(s.seatLabel)}</span>
+              </button>`;
+            }).join('')}
+          </div>
+        </div>
+      `;}).join('')}
+  `;
+}
+
+/* ---------- rendering: dues ---------- */
+function renderDues(){
+  const mk = state._duesMonth || monthKey();
+  const cur = state.settings.currency;
+  const monthPayments = state.payments.filter(p=>p.month===mk && visibleResidentIdSet().has(p.residentId));
+  const collected = monthPayments.reduce((s,p)=>s+(p.amountPaid||0),0);
+  const due = monthPayments.reduce((s,p)=>s+Math.max(0,(p.amountDue||0)-(p.amountPaid||0)),0);
+  const generated = !!state.settings.lastGeneratedMonth && state.settings.lastGeneratedMonth >= mk;
+  const activeResidents = visibleResidents().filter(r=>r.status!=='left');
+  const missing = activeResidents.filter(r=>!monthPayments.find(p=>p.residentId===r.id));
+
+  return `
+    <div class="section-title"><h2>Dues</h2>
+      <input type="month" id="dues-month" value="${mk}" style="border:none; background:var(--paper-alt); border-radius:8px; padding:5px 8px; font-family:var(--font-mono); font-size:12px;" />
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="eyebrow">Collected</div><div class="big-num" style="color:var(--green); font-size:26px;">${cur}${fmtMoney(collected)}</div></div>
+      <div class="stat-card"><div class="eyebrow">Outstanding</div><div class="big-num" style="color:var(--rust); font-size:26px;">${cur}${fmtMoney(due)}</div></div>
+    </div>
+    ${missing.length>0 ? `<div class="card" style="background:var(--gold-tint); border-color:transparent;">
+      <div style="font-size:13.5px; font-weight:600; margin-bottom:8px;">${missing.length} resident(s) have no due entry for ${esc(monthLabel(mk))} yet.</div>
+      <button class="btn btn-primary btn-sm" id="btn-generate-dues">Generate this month's dues</button>
+    </div>` : ''}
+    <div class="section-title"><h2>${esc(monthLabel(mk))}</h2></div>
+    ${activeResidents.length===0 ? emptyState('users','No residents yet','') :
+      `<div class="card" style="padding:4px 12px;">${activeResidents.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(r=>{
+        const p = monthPayments.find(x=>x.residentId===r.id);
+        const st = p ? p.status : 'due';
+        return `<div class="list-row" data-open-resident="${r.id}" style="cursor:pointer;">
+          <div class="avatar">${esc(initials(r.name))}</div>
+          <div class="row-main"><div class="row-title">${esc(r.name)}</div>
+          <div class="row-sub">${p ? cur+fmtMoney(p.amountPaid||0)+' of '+cur+fmtMoney(p.amountDue||0) : 'No entry yet'}</div></div>
+          <span class="badge ${st}">${st}</span>
+        </div>`;
+      }).join('')}</div>`}
+  `;
+}
+
+/* ---------- rendering: settings ---------- */
+function renderSettings(){
+  const s = state.settings;
+  const fbCfg = lsGet(LS.fbConfig, null);
+  const gKey = lsGet(LS.geminiKey, '');
+  const themePref = lsGet(LS.theme, 'dark');
+  return `
+    <div class="section-title"><h2>Settings</h2></div>
+
+    <div class="section-title" style="margin-top:0;"><h2>Appearance</h2></div>
+    <div class="card">
+      <div class="seg-row">
+        <button class="seg-btn ${themePref==='light'?'active':''}" data-theme-pref="light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${SUN_PATH}</svg> Light
+        </button>
+        <button class="seg-btn ${themePref==='dark'?'active':''}" data-theme-pref="dark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${MOON_PATH}</svg> Dark
+        </button>
+        <button class="seg-btn ${themePref==='system'?'active':''}" data-theme-pref="system">System</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field"><label>Hostel name</label><input id="set-hostel-name" value="${esc(s.hostelName)}" /></div>
+      <div class="field"><label>Currency symbol</label><input id="set-currency" value="${esc(s.currency)}" style="max-width:100px;" /></div>
+      <div class="field"><label>Voice command language</label>
+        <select id="set-voice-lang">
+          <option value="en-US" ${s.voiceLang==='en-US'?'selected':''}>English</option>
+          <option value="bn-BD" ${s.voiceLang==='bn-BD'?'selected':''}>Bengali (বাংলা)</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-sm" id="btn-save-general">Save</button>
+    </div>
+
+    <div class="section-title"><h2>Gemini voice assistant</h2></div>
+    <div class="card">
+      <p class="muted" style="font-size:12.5px; margin:0 0 10px;">Get a free API key at <span class="mono">aistudio.google.com</span> → "Get API key". It stays on this device only.</p>
+      <div class="field"><label>Gemini API key</label><input id="set-gemini-key" type="password" value="${esc(gKey)}" placeholder="AIza..." /></div>
+      <button class="btn btn-primary btn-sm" id="btn-save-gemini">Save key</button>
+    </div>
+
+    <div class="section-title"><h2>Cloud sync</h2></div>
+    <div class="card">
+      <p class="muted" style="font-size:12.5px; margin:0 0 10px;">
+        ${cloud ? 'Connected. Data is stored in your Firebase project and synced across devices.' : 'Right now data is stored only on this device (Local mode). Paste a Firebase project config below to sync to the cloud for free — see the README for the 5-minute setup.'}
+      </p>
+      <div class="field"><label>Firebase config (JSON)</label><textarea id="set-fb-config" rows="4" placeholder='{"apiKey":"...","projectId":"...", ...}'>${fbCfg?esc(JSON.stringify(fbCfg)):''}</textarea></div>
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn btn-primary btn-sm" id="btn-connect-cloud">${cloud?'Reconnect':'Connect'}</button>
+        ${fbCfg ? `<button class="btn btn-outline btn-sm" id="btn-disconnect-cloud">Disconnect</button>` : ''}
+      </div>
+      ${cloud ? `<div class="btn-row"><button class="btn btn-outline btn-sm" id="btn-signout">Sign out (${currentUser?.email||''})</button></div>` : ''}
+    </div>
+
+    <div class="section-title"><h2>App lock</h2></div>
+    <div class="card">
+      <p class="muted" style="font-size:12.5px; margin:0 0 10px;">Optional 4-digit PIN so residents' data isn't visible if someone picks up this device.</p>
+      <div class="btn-row" style="margin-top:0;">
+        <button class="btn btn-outline btn-sm" id="btn-set-pin">${lsGet(LS.pin,null)?'Change PIN':'Set PIN'}</button>
+        ${lsGet(LS.pin,null) ? `<button class="btn btn-outline btn-sm" id="btn-clear-pin">Remove PIN</button>` : ''}
+      </div>
+    </div>
+
+    <div class="section-title"><h2>Data</h2></div>
+    <div class="card">
+      <div class="btn-row" style="margin-top:0;">
+        <button class="btn btn-ghost btn-sm" id="btn-export">Export backup (.json)</button>
+        <label class="btn btn-outline btn-sm" style="cursor:pointer;">Import<input type="file" id="btn-import" accept="application/json" class="hidden" /></label>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline btn-sm" data-nav="trash">🗑 Trash (${trashedResidents().length})</button>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- router ---------- */
+function nav(view, opts={}){
+  state.view = view;
+  state._openId = opts.id || null;
+  if (view==='residentForm'){
+    const r = state._openId ? state.residents.find(x=>x.id===state._openId) : null;
+    state._pendingAttachments = (r?.attachments || []).map(a=>({...a}));
+  }
+  render();
+  $('#view-root').scrollTop = 0;
+}
+async function render(){
+  $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.view===state.view));
+  const root = $('#view-root');
+  if (state.view==='dashboard') root.innerHTML = renderDashboard();
+  else if (state.view==='residents') root.innerHTML = renderResidents();
+  else if (state.view==='residentDetail') root.innerHTML = renderResidentDetail(state._openId);
+  else if (state.view==='residentForm') root.innerHTML = renderResidentForm(state._openId);
+  else if (state.view==='seats') root.innerHTML = renderSeats();
+  else if (state.view==='dues') root.innerHTML = renderDues();
+  else if (state.view==='settings') root.innerHTML = renderSettings();
+  else if (state.view==='trash') root.innerHTML = renderTrash();
+  bindViewEvents();
+}
+async function refresh(){ await loadAll(); await render(); }
+
+/* ---------- sheet helper ---------- */
+function openSheet(html, onMount){
+  const ov = $('#sheet-overlay');
+  ov.innerHTML = `<div class="sheet"><div class="sheet-handle"></div>${html}</div>`;
+  ov.classList.remove('hidden');
+  ov.onclick = (e) => { if (e.target===ov) closeSheet(); };
+  if (onMount) onMount(ov);
+}
+function closeSheet(){ $('#sheet-overlay').classList.add('hidden'); $('#sheet-overlay').innerHTML=''; }
+
+/* ---------- default rooms (seeded once) ---------- */
+const DEFAULT_ROOM_SEATS = { 3:1, 6:1, 32:1, 33:1, 25:3, 42:3 };
+async function seedDefaultRooms(){
+  if (state.seats.length) return;
+  for (let n=1; n<=42; n++){
+    const count = DEFAULT_ROOM_SEATS[n] || 2;
+    const bedType = count===1 ? 'single' : count===3 ? 'triple' : 'double';
+    await addRoom(String(n), count, '', bedType);
+  }
+}
+async function addRoom(room, count, floor='', bedType=''){
+  const existing = state.seats.filter(s=>s.room===room).length;
+  for (let i=1;i<=count;i++){
+    const label = String(existing+i);
+    await DB.saveSeat({ id: `seat_${room}_${label}`.replace(/\s+/g,'_'), room, seatLabel: label, status:'empty', residentId:null, floor:floor||'', bedType:bedType||'' });
+  }
+}
+
+/* ---------- seat action sheet ---------- */
+function openSeatSheet(seatId){
+  const seat = state.seats.find(s=>s.id===seatId);
+  const res = seat?.residentId ? state.residents.find(r=>r.id===seat.residentId) : null;
+  const emptySeats = visibleResidents().filter(r=>!residentSeat(r.id));
+  openSheet(`
+    <h3>Room ${esc(seat.room)} · Seat ${esc(seat.seatLabel)}</h3>
+    ${res ? `
+      <div class="list-row"><div class="avatar">${esc(initials(res.name))}</div>
+        <div class="row-main"><div class="row-title">${esc(res.name)}</div><div class="row-sub">${esc(res.phone||'')}</div></div></div>
+      <div class="btn-row"><button class="btn btn-outline" id="seat-view">View resident</button><button class="btn btn-danger" id="seat-vacate">Vacate</button></div>
+    ` : `
+      ${emptySeats.length===0 ? `<p class="muted" style="font-size:13px;">No unassigned residents. <button class="link-btn" id="seat-add-resident">Add a new resident</button> for this seat.</p>` : `
+      <div class="field"><label>Assign resident</label>
+        <select id="seat-assign-select">${emptySeats.map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('')}</select>
+      </div>
+      <button class="btn btn-primary" id="seat-assign-btn">Assign to this seat</button>`}
+    `}
+  `, (ov) => {
+    if (res){
+      $('#seat-view', ov).onclick = () => { closeSheet(); nav('residentDetail', {id:res.id}); };
+      $('#seat-vacate', ov).onclick = async () => { await vacateSeatId(seatId); closeSheet(); await refresh(); };
+    } else if (emptySeats.length===0){
+      $('#seat-add-resident', ov)?.addEventListener('click', ()=>{ closeSheet(); nav('residentForm'); });
+    } else {
+      $('#seat-assign-btn', ov).onclick = async () => {
+        const rid = $('#seat-assign-select', ov).value;
+        await assignSeatId(seatId, rid);
+        closeSheet(); await refresh();
+      };
+    }
+  });
+}
+async function assignSeatId(seatId, residentId){
+  const seat = state.seats.find(s=>s.id===seatId);
+  const prevSeat = residentSeat(residentId);
+  if (prevSeat) await DB.saveSeat({...prevSeat, status:'empty', residentId:null});
+  await DB.saveSeat({...seat, status:'occupied', residentId});
+}
+async function vacateSeatId(seatId){
+  const seat = state.seats.find(s=>s.id===seatId);
+  if (seat) await DB.saveSeat({...seat, status:'empty', residentId:null});
+}
+
+/* ---------- record payment sheet ---------- */
+function openPaymentSheet(residentId){
+  const r = state.residents.find(x=>x.id===residentId);
+  const mk = monthKey();
+  const existing = currentMonthPayment(residentId, mk);
+  openSheet(`
+    <h3>Record payment · ${esc(r.name)}</h3>
+    <div class="field"><label>Month</label><input id="pay-month" type="month" value="${mk}" /></div>
+    <div class="field"><label>Amount due (${esc(state.settings.currency)})</label><input id="pay-due" type="number" min="0" value="${existing?.amountDue ?? r.monthlyRent ?? ''}" /></div>
+    <div class="field"><label>Amount paid now (${esc(state.settings.currency)})</label><input id="pay-amount" type="number" min="0" value="${existing?.amountPaid ?? ''}" /></div>
+    <button class="btn btn-primary" id="pay-save">Save payment</button>
+  `, (ov) => {
+    $('#pay-save', ov).onclick = async () => {
+      const month = $('#pay-month', ov).value || mk;
+      const amountDue = parseFloat($('#pay-due', ov).value) || 0;
+      const amountPaid = parseFloat($('#pay-amount', ov).value) || 0;
+      await recordPayment(residentId, { month, amountDue, amountPaid });
+      closeSheet(); await refresh();
+    };
+  });
+}
+async function recordPayment(residentId, {month, amountDue, amountPaid, status}){
+  const r = state.residents.find(x=>x.id===residentId);
+  const existing = currentMonthPayment(residentId, month);
+  const due = amountDue ?? existing?.amountDue ?? r?.monthlyRent ?? 0;
+  const paid = amountPaid ?? existing?.amountPaid ?? 0;
+  let st = status;
+  if (!st) st = paid<=0 ? 'due' : (paid>=due ? 'paid' : 'partial');
+  await DB.savePayment({
+    id: existing?.id, residentId, residentName:r?.name||'', month, amountDue:due, amountPaid:paid, status:st,
+    paidDate: paid>0 ? todayISO() : (existing?.paidDate||null), note: existing?.note||''
+  });
+}
+
+/* ---------- events ---------- */
+function bindViewEvents(){
+  $$('[data-nav]').forEach(el => el.addEventListener('click', () => nav(el.dataset.nav, {id: el.dataset.id})));
+  $$('[data-open-resident]').forEach(el => el.addEventListener('click', () => nav('residentDetail', {id: el.dataset.openResident})));
+  $$('[data-rfilter]').forEach(el => el.addEventListener('click', () => { state.residentFilter = el.dataset.rfilter; render(); }));
+  $('#resident-search')?.addEventListener('input', (e) => { state._residentSearch = e.target.value; render(); });
+  $$('[data-seat]').forEach(el => el.addEventListener('click', () => openSeatSheet(el.dataset.seat)));
+  $$('[data-theme-pref]').forEach(el => el.addEventListener('click', () => { lsSet(LS.theme, el.dataset.themePref); applyTheme(); render(); }));
+  $('#seat-search')?.addEventListener('input', (e) => { state._seatSearch = e.target.value; render(); });
+  $$('[data-seat-sort]').forEach(el => el.addEventListener('click', () => { state.seatSortMode = el.dataset.seatSort; render(); }));
+
+  const rf = $('#resident-form');
+  if (rf){
+    const rfRoom = $('#rf-room');
+    if (rfRoom){
+      const editing = state._openId ? state.residents.find(x=>x.id===state._openId) : null;
+      const curSeat = editing ? residentSeat(editing.id) : null;
+      populateSeatSelect(rfRoom.value, state._openId, curSeat?.seatLabel);
+      rfRoom.addEventListener('change', () => populateSeatSelect(rfRoom.value, state._openId, null));
+    }
+    bindPendingAttButtons();
+    $('#rf-att-input')?.addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files || []);
+      for (const file of files){
+        try{ const att = await DB.uploadFile(file, state._openId || 'pending'); state._pendingAttachments = [...(state._pendingAttachments||[]), att]; }
+        catch(err){ toast(err.message); }
+      }
+      const listEl = $('#rf-att-list');
+      if (listEl){ listEl.innerHTML = renderPendingAttachmentsList(); bindPendingAttButtons(); }
+      e.target.value = '';
+    });
+
+    rf.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(rf);
+      const r = state._openId ? {...state.residents.find(x=>x.id===state._openId)} : { status:'active', createdAt:new Date().toISOString(), deletedAt:null };
+      ['name','phone','email','nid','address','guardianName','guardianPhone','occupation','notes','joinDate'].forEach(k => r[k]=fd.get(k)||'');
+      r.monthlyRent = parseFloat(fd.get('monthlyRent'))||0;
+      r.attachments = state._pendingAttachments || [];
+      const saved = await DB.saveResident(r);
+
+      const chosenRoom = fd.get('room') || '';
+      const chosenSeatLabel = fd.get('seatLabel') || '';
+      const prevSeat = residentSeat(saved.id);
+      if (chosenRoom && chosenSeatLabel){
+        const target = state.seats.find(s=>s.room===chosenRoom && s.seatLabel===chosenSeatLabel);
+        if (target && target.id !== prevSeat?.id){
+          if (prevSeat) await DB.saveSeat({...prevSeat, status:'empty', residentId:null});
+          await DB.saveSeat({...target, status:'occupied', residentId:saved.id});
+        }
+      } else if (prevSeat){
+        await DB.saveSeat({...prevSeat, status:'empty', residentId:null});
+      }
+
+      toast('Resident saved — synced and room assignment updated.');
+      await refresh(); nav('residentDetail', {id:saved.id});
+    });
+  }
+
+  $('#btn-record-payment')?.addEventListener('click', () => openPaymentSheet(state._openId));
+  $('#btn-delete-resident')?.addEventListener('click', async () => {
+    if (!confirm(`Move this resident to Trash? Their seat will be freed right away. You can restore them any time within ${TRASH_DAYS} days.`)) return;
+    await softDeleteResident(state._openId);
+    toast('Moved to trash.'); await refresh(); nav('residents');
+  });
+  $('#btn-vacate')?.addEventListener('click', async () => {
+    const seat = residentSeat(state._openId);
+    if (seat){ await vacateSeatId(seat.id); toast('Seat vacated.'); await refresh(); nav('residentDetail',{id:state._openId}); }
+    else { closeSheetSafe(); nav('seats'); toast('Tap an empty seat to assign this resident.'); }
+  });
+  $('#att-input')?.addEventListener('change', async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    toast('Uploading…');
+    try{
+      const att = await DB.uploadFile(file, state._openId);
+      const r = state.residents.find(x=>x.id===state._openId);
+      r.attachments = [...(r.attachments||[]), att];
+      await DB.saveResident(r); toast('File added.'); await refresh(); nav('residentDetail',{id:state._openId});
+    }catch(err){ toast(err.message); }
+  });
+  $$('[data-del-att]').forEach(el => el.addEventListener('click', async () => {
+    const r = state.residents.find(x=>x.id===state._openId);
+    r.attachments = (r.attachments||[]).filter(a=>a.id!==el.dataset.delAtt);
+    await DB.saveResident(r); await refresh(); nav('residentDetail',{id:state._openId});
+  }));
+  $$('[data-restore]').forEach(el => el.addEventListener('click', async () => {
+    await restoreResident(el.dataset.restore);
+    toast('Resident restored — unassigned, ready to add back to a room.'); await refresh(); nav('trash');
+  }));
+  $$('[data-purge]').forEach(el => el.addEventListener('click', async () => {
+    if (!confirm('Permanently delete this record right now? This cannot be undone.')) return;
+    await DB.deleteResident(el.dataset.purge);
+    state.residents = state.residents.filter(r=>r.id!==el.dataset.purge);
+    toast('Permanently deleted.'); render();
+  }));
+
+  $('#dues-month')?.addEventListener('change', (e) => { state._duesMonth = e.target.value; render(); });
+  $('#btn-generate-dues')?.addEventListener('click', async () => {
+    await generateMonthlyDues(state._duesMonth || monthKey());
+    toast('Dues generated for this month.'); await refresh();
+  });
+
+  $('#btn-save-general')?.addEventListener('click', async () => {
+    await DB.saveSettings({ hostelName: $('#set-hostel-name').value.trim()||'Orchid Hostel', currency: $('#set-currency').value||'৳', voiceLang: $('#set-voice-lang').value });
+    toast('Saved.'); await refresh();
+  });
+  $('#btn-save-gemini')?.addEventListener('click', () => { lsSet(LS.geminiKey, $('#set-gemini-key').value.trim()); toast('Gemini key saved on this device.'); });
+  $('#btn-connect-cloud')?.addEventListener('click', async () => {
+    let cfg;
+    try{ cfg = JSON.parse($('#set-fb-config').value); }catch(e){ toast('That does not look like valid JSON.'); return; }
+    lsSet(LS.fbConfig, cfg);
+    toast('Connecting…');
+    location.reload();
+  });
+  $('#btn-disconnect-cloud')?.addEventListener('click', () => {
+    if (!confirm('Disconnect cloud sync? This device will go back to local-only storage.')) return;
+    localStorage.removeItem(LS.fbConfig); location.reload();
+  });
+  $('#btn-signout')?.addEventListener('click', async () => { await cloud.ax.signOut(cloud.auth); location.reload(); });
+
+  $('#btn-set-pin')?.addEventListener('click', () => openPinSetupSheet());
+  $('#btn-clear-pin')?.addEventListener('click', () => { localStorage.removeItem(LS.pin); toast('PIN removed.'); render(); });
+
+  $('#btn-export')?.addEventListener('click', async () => {
+    const data = { residents: await DB.listResidents(), seats: await DB.listSeats(), payments: await DB.listPayments(), settings: await DB.settings(), exportedAt: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'orchid-hostel-backup.json'; a.click();
+  });
+  $('#btn-import')?.addEventListener('change', async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const text = await file.text();
+    try{
+      const data = JSON.parse(text);
+      if (!confirm('Import will merge this backup into your current data. Continue?')) return;
+      for (const r of data.residents||[]) await DB.saveResident(r);
+      for (const s of data.seats||[]) await DB.saveSeat(s);
+      for (const p of data.payments||[]) await DB.savePayment(p);
+      if (data.settings) await DB.saveSettings(data.settings);
+      toast('Import complete.'); await refresh();
+    }catch(err){ toast('Could not read that file.'); }
+  });
+}
+function populateSeatSelect(room, residentId, preselectLabel){
+  const sel = $('#rf-seat'); if (!sel) return;
+  if (!room){ sel.innerHTML = '<option value="">— Select room first —</option>'; sel.disabled = true; return; }
+  const avail = state.seats.filter(s=>s.room===room && (!s.residentId || s.residentId===residentId));
+  if (avail.length===0){ sel.innerHTML = '<option value="">No empty seats in this room</option>'; sel.disabled = true; return; }
+  sel.disabled = false;
+  const sorted = avail.slice().sort((a,b)=>a.seatLabel.localeCompare(b.seatLabel,undefined,{numeric:true}));
+  sel.innerHTML = '<option value="">— No seat —</option>' + sorted.map(s=>
+    `<option value="${esc(s.seatLabel)}" ${s.seatLabel===preselectLabel?'selected':''}>${esc(s.seatLabel)}${s.residentId?' (current)':''}</option>`
+  ).join('');
+}
+function bindPendingAttButtons(){
+  $$('[data-rm-pending-att]').forEach(el => el.addEventListener('click', () => {
+    state._pendingAttachments = (state._pendingAttachments||[]).filter(a=>a.id!==el.dataset.rmPendingAtt);
+    const listEl = $('#rf-att-list');
+    if (listEl){ listEl.innerHTML = renderPendingAttachmentsList(); bindPendingAttButtons(); }
+  }));
+}
+function closeSheetSafe(){ try{closeSheet();}catch(e){} }
+
+async function generateMonthlyDues(mk){
+  const active = visibleResidents().filter(r=>r.status!=='left');
+  for (const r of active){
+    if (currentMonthPayment(r.id, mk)) continue;
+    await DB.savePayment({ residentId:r.id, residentName:r.name, month:mk, amountDue:r.monthlyRent||0, amountPaid:0, status:'due', paidDate:null, note:'' });
+  }
+  await DB.saveSettings({ lastGeneratedMonth: mk });
+}
+
+/* tab bar */
+$('#tabbar').addEventListener('click', (e) => {
+  const btn = e.target.closest('.tab'); if (!btn) return;
+  nav(btn.dataset.view);
+});
+$('#sync-pill').addEventListener('click', () => nav('settings'));
+$('#theme-toggle').addEventListener('click', toggleTheme);
+
+/* ================= GEMINI VOICE ASSISTANT ================= */
+const GEMINI_MODEL = 'gemini-3.7-flash';
+
+function fuzzyFindResident(nameQuery){
+  if (!nameQuery) return null;
+  const q = nameQuery.trim().toLowerCase();
+  const pool = visibleResidents();
+  let match = pool.find(r => r.name.toLowerCase() === q);
+  if (!match) match = pool.find(r => r.name.toLowerCase().includes(q));
+  return match || null;
+}
+
+const TOOLS = [{ functionDeclarations: [
+  { name:'get_dashboard_summary', description:'Get counts of total/occupied/empty seats, active resident count, and total money due this month across the whole hostel.', parameters:{type:'object', properties:{}} },
+  { name:'find_residents', description:'Search residents by (partial) name, or list residents matching a status filter.', parameters:{type:'object', properties:{
+      query:{type:'string', description:'Partial or full name to search for. Omit to just use the filter.'},
+      filter:{type:'string', enum:['all','due','paid','active','left']}
+    }}},
+  { name:'add_resident', description:'Add a brand new resident. Optionally assign them a room and seat immediately (creates the seat if the room does not exist yet, as long as roomSeatCount is given for a brand-new room).', parameters:{type:'object', properties:{
+      name:{type:'string'}, phone:{type:'string'}, monthlyRent:{type:'number'},
+      room:{type:'string'}, seatLabel:{type:'string'}, guardianName:{type:'string'}, guardianPhone:{type:'string'},
+      address:{type:'string'}, joinDate:{type:'string', description:'YYYY-MM-DD, defaults to today'}
+    }, required:['name']}},
+  { name:'update_resident', description:'Update one or more fields on an existing resident, found by name.', parameters:{type:'object', properties:{
+      name:{type:'string'}, phone:{type:'string'}, monthlyRent:{type:'number'}, address:{type:'string'},
+      guardianName:{type:'string'}, guardianPhone:{type:'string'}, notes:{type:'string'}
+    }, required:['name']}},
+  { name:'remove_resident', description:'Delete a resident, found by name, and free their seat. This moves them to Trash rather than erasing them immediately — they can still be restored for a while afterward.', parameters:{type:'object', properties:{name:{type:'string'}}, required:['name']}},
+  { name:'list_seats', description:'List seats, optionally filtered by status (empty/occupied) or a specific room.', parameters:{type:'object', properties:{filter:{type:'string', enum:['all','empty','occupied']}, room:{type:'string'}}}},
+  { name:'add_room', description:'Create a new room with a given number of seats (all starting empty). Floor and bed type are optional.', parameters:{type:'object', properties:{room:{type:'string'}, seatCount:{type:'number'}, floor:{type:'string'}, bedType:{type:'string', enum:['single','double']}}, required:['room','seatCount']}},
+  { name:'assign_seat', description:'Assign an existing resident (found by name) to a specific room and seat number.', parameters:{type:'object', properties:{name:{type:'string'}, room:{type:'string'}, seatLabel:{type:'string'}}, required:['name','room','seatLabel']}},
+  { name:'vacate_seat', description:'Free up a seat, either identified by resident name, or by room + seat number.', parameters:{type:'object', properties:{name:{type:'string'}, room:{type:'string'}, seatLabel:{type:'string'}}}},
+  { name:'record_payment', description:'Record/update a payment for a resident (found by name) for a month (defaults to current month).', parameters:{type:'object', properties:{
+      name:{type:'string'}, month:{type:'string', description:'YYYY-MM, defaults to current month'}, amountPaid:{type:'number'}, amountDue:{type:'number'}, status:{type:'string', enum:['paid','partial','due']}
+    }, required:['name']}},
+  { name:'get_dues_summary', description:'Get total collected, total outstanding, and the list of residents who still owe money for a given month (defaults to current month).', parameters:{type:'object', properties:{month:{type:'string'}}}},
+  { name:'generate_monthly_dues', description:'Create the current due entry (equal to monthly rent) for every active resident who does not already have one this month.', parameters:{type:'object', properties:{month:{type:'string'}}}}
+]}];
+
+const ACTIONS = {
+  async get_dashboard_summary(){
+    const seatsTotal = state.seats.length, occ = state.seats.filter(s=>s.residentId).length;
+    return { seatsTotal, seatsOccupied:occ, seatsEmpty:seatsTotal-occ, activeResidents: visibleResidents().filter(r=>r.status!=='left').length, totalDueThisMonth: totalDueAmount(), currency: state.settings.currency };
+  },
+  async find_residents({query, filter}){
+    let list = visibleResidents();
+    if (filter && filter!=='all') list = list.filter(r => filter==='left' ? r.status==='left' : filter==='active' ? r.status!=='left' : residentDueStatus(r.id)===filter);
+    if (query) list = list.filter(r=>r.name.toLowerCase().includes(query.toLowerCase()));
+    return { count:list.length, residents: list.slice(0,20).map(r=>({ name:r.name, phone:r.phone, seat: residentSeat(r.id) ? `${residentSeat(r.id).room}-${residentSeat(r.id).seatLabel}` : null, dueStatus: residentDueStatus(r.id) })) };
+  },
+  async add_resident(args){
+    const r = { id: uid('res'), status:'active', createdAt:new Date().toISOString(), attachments:[],
+      name:args.name, phone:args.phone||'', monthlyRent:args.monthlyRent||0, guardianName:args.guardianName||'',
+      guardianPhone:args.guardianPhone||'', address:args.address||'', joinDate:args.joinDate||todayISO(), email:'', nid:'', occupation:'', notes:'' };
+    await DB.saveResident(r);
+    let seatMsg = 'no seat assigned yet';
+    if (args.room && args.seatLabel){
+      await refreshStateFromDB();
+      let seat = state.seats.find(s=>s.room===args.room && s.seatLabel===String(args.seatLabel));
+      if (!seat){ await addRoom(args.room, 1); await refreshStateFromDB(); seat = state.seats.find(s=>s.room===args.room && !s.residentId); }
+      if (seat){ await assignSeatId(seat.id, r.id); seatMsg = `assigned to room ${args.room} seat ${args.seatLabel}`; }
+    }
+    await refreshStateFromDB();
+    return { ok:true, name:r.name, seatMsg };
+  },
+  async update_resident(args){
+    const r = fuzzyFindResident(args.name);
+    if (!r) return { ok:false, error:`No resident matching "${args.name}"` };
+    ['phone','monthlyRent','address','guardianName','guardianPhone','notes'].forEach(k => { if (args[k]!==undefined) r[k]=args[k]; });
+    await DB.saveResident(r); await refreshStateFromDB();
+    return { ok:true, name:r.name };
+  },
+  async remove_resident(args){
+    const r = fuzzyFindResident(args.name);
+    if (!r) return { ok:false, error:`No resident matching "${args.name}"` };
+    await softDeleteResident(r.id); await refreshStateFromDB();
+    return { ok:true, removed:r.name, note:`Moved to trash, kept for ${TRASH_DAYS} days in case this was a mistake.` };
+  },
+  async list_seats({filter, room}={}){
+    let list = state.seats;
+    if (room) list = list.filter(s=>s.room===room);
+    if (filter==='empty') list = list.filter(s=>!s.residentId);
+    if (filter==='occupied') list = list.filter(s=>s.residentId);
+    return { count:list.length, seats:list.slice(0,40).map(s=>({room:s.room, seat:s.seatLabel, status: s.residentId?'occupied':'empty', resident: s.residentId ? state.residents.find(r=>r.id===s.residentId)?.name : null})) };
+  },
+  async add_room(args){
+    await addRoom(String(args.room), parseInt(args.seatCount,10)||1, args.floor?String(args.floor):'', args.bedType||'');
+    await refreshStateFromDB();
+    return { ok:true, room:args.room, seatCount:args.seatCount };
+  },
+  async assign_seat(args){
+    const r = fuzzyFindResident(args.name);
+    if (!r) return { ok:false, error:`No resident matching "${args.name}"` };
+    const seat = state.seats.find(s=>s.room===String(args.room) && s.seatLabel===String(args.seatLabel));
+    if (!seat) return { ok:false, error:`No seat ${args.seatLabel} in room ${args.room}` };
+    await assignSeatId(seat.id, r.id); await refreshStateFromDB();
+    return { ok:true, name:r.name, room:args.room, seat:args.seatLabel };
+  },
+  async vacate_seat(args){
+    let seat = null;
+    if (args.name){ const r = fuzzyFindResident(args.name); seat = r ? residentSeat(r.id) : null; }
+    else if (args.room && args.seatLabel){ seat = state.seats.find(s=>s.room===String(args.room)&&s.seatLabel===String(args.seatLabel)); }
+    if (!seat) return { ok:false, error:'Could not find that seat.' };
+    await vacateSeatId(seat.id); await refreshStateFromDB();
+    return { ok:true };
+  },
+  async record_payment(args){
+    const r = fuzzyFindResident(args.name);
+    if (!r) return { ok:false, error:`No resident matching "${args.name}"` };
+    const month = args.month || monthKey();
+    const existing = currentMonthPayment(r.id, month);
+    const amountDue = args.amountDue ?? existing?.amountDue ?? r.monthlyRent ?? 0;
+    let amountPaid = args.amountPaid ?? existing?.amountPaid ?? 0;
+    let status = args.status;
+    if (status==='paid' && args.amountPaid===undefined) amountPaid = amountDue;
+    await recordPayment(r.id, { month, amountDue, amountPaid, status });
+    await refreshStateFromDB();
+    return { ok:true, name:r.name, month, amountDue, amountPaid };
+  },
+  async get_dues_summary({month}={}){
+    const mk = month || monthKey();
+    const list = state.payments.filter(p=>p.month===mk && visibleResidentIdSet().has(p.residentId));
+    const collected = list.reduce((s,p)=>s+(p.amountPaid||0),0);
+    const outstanding = list.reduce((s,p)=>s+Math.max(0,(p.amountDue||0)-(p.amountPaid||0)),0);
+    const owing = list.filter(p=>(p.amountDue||0)>(p.amountPaid||0)).map(p=>p.residentName);
+    return { month:mk, collected, outstanding, residentsWithDue: owing, currency: state.settings.currency };
+  },
+  async generate_monthly_dues({month}={}){
+    const mk = month || monthKey();
+    await generateMonthlyDues(mk); await refreshStateFromDB();
+    return { ok:true, month:mk };
+  }
+};
+async function refreshStateFromDB(){ [state.residents, state.seats, state.payments] = await Promise.all([DB.listResidents(), DB.listSeats(), DB.listPayments()]); }
+
+async function runVoiceCommand(userText){
+  const apiKey = lsGet(LS.geminiKey, '');
+  if (!apiKey) throw new Error('Add a free Gemini API key in Settings first.');
+  const settings = await DB.settings();
+  const sys = `You are the voice assistant built into "${settings.hostelName}"'s hostel management app. `+
+    `Today's date is ${todayISO()}. The currency symbol is "${settings.currency}". `+
+    `Use the provided functions to look up or change real data — never guess numbers. `+
+    `If a request is ambiguous (e.g. two residents with similar names), ask a short clarifying question instead of guessing. `+
+    `After you finish, reply with ONE short, friendly, spoken-style confirmation sentence (not a list, not markdown), in the same language the user used (English or Bengali). `+
+    `If you could not do something, say plainly what went wrong.`;
+  let contents = [{ role:'user', parts:[{text:userText}] }];
+  let finalText = '';
+  for (let i=0;i<6;i++){
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ systemInstruction:{parts:[{text:sys}]}, contents, tools:TOOLS })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error?.message || `Gemini request failed (${res.status})`);
+    const parts = data.candidates?.[0]?.content?.parts || [];
+    const calls = parts.filter(p=>p.functionCall);
+    if (calls.length===0){ finalText = parts.map(p=>p.text||'').join(' ').trim(); break; }
+    contents.push({ role:'model', parts });
+    const responseParts = [];
+    for (const c of calls){
+      const { name, args } = c.functionCall;
+      let result;
+      try{ result = ACTIONS[name] ? await ACTIONS[name](args||{}) : {error:`Unknown action ${name}`}; }
+      catch(err){ result = { error: err.message }; }
+      responseParts.push({ functionResponse:{ name, response: result } });
+    }
+    contents.push({ role:'function', parts: responseParts });
+  }
+  return finalText || 'Done.';
+}
+
+function speak(text){
+  if (!('speechSynthesis' in window)) return;
+  try{
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = state.settings.voiceLang || 'en-US';
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+function openVoiceModal(){
+  const m = $('#voice-modal');
+  m.innerHTML = `<div class="voice-card">
+    <div class="voice-orb listening" id="vo-orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v3"/></svg></div>
+    <div class="voice-status" id="vo-status">Listening…</div>
+    <div class="voice-transcript" id="vo-transcript"></div>
+    <div class="voice-reply hidden" id="vo-reply"></div>
+    <div class="voice-type-row">
+      <input id="vo-type" placeholder="Or type a command…" />
+      <button class="btn btn-primary btn-sm" id="vo-send">Send</button>
+    </div>
+    <button class="link-btn" id="vo-close" style="margin-top:12px;">Close</button>
+  </div>`;
+  m.classList.remove('hidden');
+  $('#vo-close').onclick = closeVoiceModal;
+  $('#vo-send').onclick = () => { const t = $('#vo-type').value.trim(); if (t) handleVoiceText(t); };
+  $('#vo-type').addEventListener('keydown', (e) => { if (e.key==='Enter'){ const t=e.target.value.trim(); if (t) handleVoiceText(t); } });
+}
+function closeVoiceModal(){ $('#voice-modal').classList.add('hidden'); $('#voice-modal').innerHTML=''; try{window.speechSynthesis.cancel();}catch(e){} }
+
+async function handleVoiceText(text){
+  $('#mic-btn').classList.remove('listening');
+  $('#vo-orb')?.classList.remove('listening');
+  $('#vo-status').textContent = 'Thinking…';
+  $('#vo-transcript').textContent = `“${text}”`;
+  $('#vo-type').value='';
+  try{
+    const reply = await runVoiceCommand(text);
+    $('#vo-status').textContent = 'Here you go';
+    const rep = $('#vo-reply'); rep.textContent = reply; rep.classList.remove('hidden');
+    speak(reply);
+    await render();
+  }catch(err){
+    $('#vo-status').textContent = 'Something went wrong';
+    const rep = $('#vo-reply'); rep.textContent = err.message; rep.classList.remove('hidden');
+  }
+}
+
+function startListening(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR){ toast('Voice input needs Chrome on Android. You can still type a command.'); openVoiceModal(); $('#vo-status').textContent='Type a command below'; $('#vo-orb').classList.remove('listening'); return; }
+  if (!lsGet(LS.geminiKey,'')){ toast('Add a free Gemini API key in Settings first.'); nav('settings'); return; }
+  openVoiceModal();
+  $('#mic-btn').classList.add('listening');
+  const rec = new SR();
+  rec.lang = state.settings.voiceLang || 'en-US';
+  rec.interimResults = false; rec.maxAlternatives = 1;
+  rec.onresult = (e) => { const text = e.results[0][0].transcript; handleVoiceText(text); };
+  rec.onerror = (e) => { $('#mic-btn').classList.remove('listening'); if ($('#vo-status')) $('#vo-status').textContent = 'Could not hear you — try typing instead'; };
+  rec.onend = () => { $('#mic-btn').classList.remove('listening'); };
+  rec.start();
+}
+$('#mic-btn').addEventListener('click', startListening);
+
+/* ================= PIN LOCK ================= */
+function openPinSetupSheet(){
+  let entry = '';
+  openSheet(`<h3>Set a 4-digit PIN</h3><div class="pin-dots" id="ps-dots"></div><div class="pin-pad" id="ps-pad"></div>`, (ov) => {
+    const dotsEl = $('#ps-dots', ov), padEl = $('#ps-pad', ov);
+    const draw = () => { dotsEl.innerHTML = [0,1,2,3].map(i=>`<span class="pin-dot ${i<entry.length?'filled':''}"></span>`).join(''); };
+    draw();
+    ['1','2','3','4','5','6','7','8','9','','0','⌫'].forEach(k => {
+      const b = document.createElement('button');
+      b.textContent = k;
+      if (!k) b.style.visibility='hidden';
+      b.onclick = () => {
+        if (k==='⌫') entry = entry.slice(0,-1);
+        else if (k && entry.length<4) entry += k;
+        draw();
+        if (entry.length===4){ lsSet(LS.pin, entry); toast('PIN set.'); closeSheet(); render(); }
+      };
+      padEl.appendChild(b);
+    });
+  });
+}
+function showLockScreen(){
+  $('#lock-screen').classList.remove('hidden');
+  $('#app').classList.add('hidden');
+  let entry = '';
+  const dotsEl = $('#pin-dots'), padEl = $('#pin-pad');
+  padEl.innerHTML = '';
+  const draw = () => { dotsEl.innerHTML = [0,1,2,3].map(i=>`<span class="pin-dot ${i<entry.length?'filled':''}"></span>`).join(''); };
+  draw();
+  ['1','2','3','4','5','6','7','8','9','','0','⌫'].forEach(k => {
+    const b = document.createElement('button');
+    b.textContent = k; if (!k) b.style.visibility='hidden';
+    b.onclick = () => {
+      if (k==='⌫') entry = entry.slice(0,-1);
+      else if (k && entry.length<4) entry += k;
+      draw();
+      if (entry.length===4){
+        if (entry === lsGet(LS.pin,null)){ $('#lock-screen').classList.add('hidden'); $('#app').classList.remove('hidden'); }
+        else { toast('Wrong PIN.'); entry=''; draw(); }
+      }
+    };
+    padEl.appendChild(b);
+  });
+}
+
+/* ================= BOOT ================= */
+async function boot(){
+  applyTheme();
+  try{ await initCloud(); }catch(e){ /* toast already shown */ }
+
+  if (cloud){
+    currentUser = await waitForAuth();
+    if (!currentUser){
+      $('#signin-screen').classList.remove('hidden');
+      $('#si-signin').onclick = async () => {
+        try{ await cloud.ax.signIn(cloud.auth, $('#si-email').value.trim(), $('#si-pass').value); location.reload(); }
+        catch(e){ $('#si-error').textContent = e.message; }
+      };
+      $('#si-create').onclick = async () => {
+        try{ await cloud.ax.signUp(cloud.auth, $('#si-email').value.trim(), $('#si-pass').value); location.reload(); }
+        catch(e){ $('#si-error').textContent = e.message; }
+      };
+      $('#si-use-local').onclick = () => { localStorage.removeItem(LS.fbConfig); location.reload(); };
+      return;
+    }
+  }
+
+  const pin = lsGet(LS.pin, null);
+  if (pin){ showLockScreen(); } else { $('#app').classList.remove('hidden'); }
+
+  await loadAll();
+  const pill = $('#sync-pill'), label = $('#sync-label');
+  if (cloud){ pill.classList.add('cloud'); label.textContent = 'Cloud'; } else { label.textContent = 'Local'; }
+  render();
+
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')){
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
+}
+boot();
+</script>
+</body>
+</html>
