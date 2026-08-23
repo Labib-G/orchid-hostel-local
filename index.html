@@ -1632,8 +1632,9 @@ function populateSeatSelect(room, residentId, preselectLabel){
   if (avail.length===0){ sel.innerHTML = '<option value="">No empty seats in this room</option>'; sel.disabled = true; return; }
   sel.disabled = false;
   const sorted = avail.slice().sort((a,b)=>a.seatLabel.localeCompare(b.seatLabel,undefined,{numeric:true}));
+  const autoLabel = preselectLabel || sorted.find(s=>!s.residentId)?.seatLabel || sorted[0]?.seatLabel || '';
   sel.innerHTML = '<option value="">— No seat —</option>' + sorted.map(s=>
-    `<option value="${esc(s.seatLabel)}" ${s.seatLabel===preselectLabel?'selected':''}>${esc(s.seatLabel)}${s.residentId?' (current)':''}</option>`
+    `<option value="${esc(s.seatLabel)}" ${s.seatLabel===autoLabel?'selected':''}>${esc(s.seatLabel)}${s.residentId?' (current)':''}</option>`
   ).join('');
 }
 function bindPendingAttButtons(){
