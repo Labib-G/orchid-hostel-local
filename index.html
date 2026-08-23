@@ -546,6 +546,7 @@ const I18N = {
     'Optional 4-digit PIN so residents\' data isn\'t visible if someone picks up this device.':'ঐচ্ছিক ৪-সংখ্যার PIN, যাতে কেউ ডিভাইসটি নিলে বাসিন্দাদের তথ্য দেখা না যায়।',
     'Get a free API key at aistudio.google.com → "Get API key". It stays on this device only.':'aistudio.google.com থেকে ফ্রি API কী নিন → "Get API key"। এটি শুধু এই ডিভাইসে থাকে।',
     'Full name *':'পূর্ণ নাম *','Join date':'যোগদানের তারিখ','Room no.':'রুম নং','— No room —':'— কোন রুম নেই —','— Select room first —':'— আগে রুম বাছাই করুন —',
+    'Rent is set automatically from the room.':'রেন্ট রুম অনুযায়ী স্বয়ংক্রিয়ভাবে সেট হয়।',
     'No rooms available yet.':'এখনও কোন রুম নেই।','NID / Passport number':'এনআইডি / পাসপোর্ট নম্বর','Present address':'বর্তমান ঠিকানা','Guardian name':'অভিভাবকের নাম','Guardian phone':'অভিভাবকের ফোন',
     'Upload file':'ফাইল আপলোড','No files added yet.':'এখনও কোন ফাইল যোগ হয়নি।','Edit resident':'বাসিন্দা সম্পাদনা',
     'Scan form':'ফর্ম স্ক্যান করুন','Scan admission form (Bangla)':'ভর্তি ফর্ম স্ক্যান করুন (বাংলা)','Scanning…':'স্ক্যান হচ্ছে…',
@@ -1013,9 +1014,10 @@ function renderResidentForm(id){
         <div class="field"><label>${t('Email')}</label><input name="email" type="email" value="${esc(r?.email||'')}" /></div>
       </div>
       <div class="field-row">
-        <div class="field"><label>${t('Monthly rent')} (${esc(state.settings.currency)})</label><input name="monthlyRent" type="number" min="0" value="${r?.monthlyRent||''}" /></div>
+        <div class="field"><label>${t('Monthly rent')} (${esc(state.settings.currency)})</label><input name="monthlyRent" type="number" min="0" value="${r?.monthlyRent||''}" readonly /></div>
         <div class="field"><label>${t('Join date')}</label><input name="joinDate" type="date" value="${r?.joinDate||todayISO()}" /></div>
       </div>
+      <div class="help" style="margin-top:-8px;">${t('Rent is set automatically from the room.')}</div>
 
       <div class="field-row">
         <div class="field"><label>${t('Room no.')}</label>
@@ -1480,14 +1482,14 @@ function bindViewEvents(){
       const curSeat = editing ? residentSeat(editing.id) : null;
       populateSeatSelect(rfRoom.value, state._openId, curSeat?.seatLabel);
       const rentInput0 = rf.querySelector('input[name=\"monthlyRent\"]');
-      if (rentInput0 && !rentInput0.value && rfRoom.value){
+      if (rentInput0 && rfRoom.value){
         const dr0 = defaultRentForRoom(rfRoom.value);
         if (dr0) rentInput0.value = dr0;
       }
       rfRoom.addEventListener('change', () => {
         populateSeatSelect(rfRoom.value, state._openId, null);
         const rentInput = rf.querySelector('input[name="monthlyRent"]');
-        if (rentInput && !rentInput.value){
+        if (rentInput){
           const dr = defaultRentForRoom(rfRoom.value);
           if (dr) rentInput.value = dr;
         }
