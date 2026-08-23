@@ -548,6 +548,9 @@ const I18N = {
     'Full name *':'পূর্ণ নাম *','Join date':'যোগদানের তারিখ','Room no.':'রুম নং','— No room —':'— কোন রুম নেই —','— Select room first —':'— আগে রুম বাছাই করুন —',
     'No rooms available yet.':'এখনও কোন রুম নেই।','NID / Passport number':'এনআইডি / পাসপোর্ট নম্বর','Present address':'বর্তমান ঠিকানা','Guardian name':'অভিভাবকের নাম','Guardian phone':'অভিভাবকের ফোন',
     'Upload file':'ফাইল আপলোড','No files added yet.':'এখনও কোন ফাইল যোগ হয়নি।','Edit resident':'বাসিন্দা সম্পাদনা',
+    'Scan form':'ফর্ম স্ক্যান করুন','Scan admission form (Bangla)':'ভর্তি ফর্ম স্ক্যান করুন (বাংলা)','Scanning…':'স্ক্যান হচ্ছে…',
+    'Form scanned — filling the form.':'ফর্ম স্ক্যান হয়েছে — ফর্ম পূরণ হচ্ছে।','Could not read the form.':'ফর্ম পড়া যায়নি।','No text found on the form.':'ফর্মে কোন তথ্য পাওয়া যায়নি।',
+    'Pick a photo of the admission form':'ভর্তি ফর্মের ছবি বাছাই করুন','the AI reads it and fills the form automatically.':'AI ছবিটি পড়ে ফর্ম স্বয়ংক্রিয়ভাবে পূরণ করে।',
     'PDF, PNG, JPG or similar. Keep files modest in size — see Settings → Cloud sync for the limit.':'PDF, PNG, JPG বা অনুরূপ। ফাইলের আকার ছোট রাখুন — সীমার জন্য সেটিংস → ক্লাউড সিঙ্ক দেখুন।','incl. current':'বর্তমান সহ',
     'No rooms yet':'এখনও কোন রুম নেই','Empty seats':'খালি আসন','All seats filled':'সব আসন পূর্ণ','Every seat has a resident.':'প্রতিটি আসনে একজন বাসিন্দা আছে।',
   }
@@ -998,6 +1001,12 @@ function renderResidentForm(id){
       <h2 style="font-size:17px;">${r?t('Edit resident'):t('Add resident')}</h2>
     </div>
     <form id="resident-form">
+      <div class="card" style="margin-bottom:12px; border-color:transparent; background:var(--paper-alt);">
+        <div style="font-size:13px; font-weight:600; margin-bottom:8px;">${t('Scan admission form (Bangla)')}</div>
+        <button class="btn btn-outline btn-sm" id="btn-scan-form" type="button">📷 ${t('Scan form')}</button>
+        <input type="file" id="scan-form-input" accept="image/*" class="hidden" />
+        <div class="help" style="margin-top:6px;">${t('Pick a photo of the admission form')} — ${t('the AI reads it and fills the form automatically.')}</div>
+      </div>
       <div class="field"><label>${t('Full name *')}</label><input name="name" required value="${esc(r?.name||'')}" /></div>
       <div class="field-row">
         <div class="field"><label>${t('Phone')}</label><input name="phone" value="${esc(r?.phone||'')}" /></div>
@@ -1485,6 +1494,14 @@ function bindViewEvents(){
       });
     }
     bindPendingAttButtons();
+    $('#btn-scan-form')?.addEventListener('click', () => $('#scan-form-input')?.click());
+    $('#scan-form-input')?.addEventListener('change', (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => applyFormScan(reader.result);
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    });
     $('#rf-att-input')?.addEventListener('change', async (e) => {
       const files = Array.from(e.target.files || []);
       for (const file of files){
@@ -1811,6 +1828,60 @@ async function runVoiceCommand(userText){
     contents.push({ role:'function', parts: responseParts });
   }
   return finalText || 'Done.';
+}
+
+/* Read a hostel admission-form photo (incl. Bengali/Bangla handwriting) with Gemini Vision
+   and return the extracted resident fields as JSON. Tries several free models. */
+const VISION_MODELS = [GEMINI_MODEL, 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest'];
+async function geminiExtractForm(imageDataUrl){
+  const apiKey = lsGet(LS.geminiKey, '');
+  if (!apiKey) throw new Error(t('Add a free Gemini API key in Settings first.'));
+  const mime = (imageDataUrl.match(/^data:([^;]+);base64,/) || [, 'image/jpeg'])[1];
+  const b64 = imageDataUrl.split(',')[1];
+  const prompt = `You are reading a hostel admission form that may be handwritten in Bengali (Bangla) script or typed in English. Carefully transcribe it. ` +
+    `Reply with ONLY a single JSON object (no markdown, no commentary) using these exact keys: ` +
+    `fullName, phone, email, room, seat, monthlyRent (number), joinDate (YYYY-MM-DD), nid, address, guardianName, guardianPhone, occupation, notes. ` +
+    `Use "" for anything missing or illegible. Transcribe Bengali text exactly as written.`;
+  let lastErr;
+  for (const model of VISION_MODELS){
+    try{
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ contents:[{ role:'user', parts:[ {text:prompt}, {inline_data:{mime_type:mime, data:b64}} ]}]})
+      });
+      const data = await res.json();
+      if (!res.ok){ lastErr = data?.error?.message || (`Gemini request failed (${res.status})`); continue; }
+      const text = data.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('') || '';
+      const m = text.match(/\{[\s\S]*\}/);
+      if (!m){ lastErr = t('No text found on the form.'); continue; }
+      return JSON.parse(m[0]);
+    }catch(e){ lastErr = e.message; }
+  }
+  throw new Error(lastErr || t('Could not read the form.'));
+}
+
+async function applyFormScan(imageDataUrl){
+  toast(t('Scanning…'));
+  let info;
+  try{ info = await geminiExtractForm(imageDataUrl); }
+  catch(err){ toast(err.message || t('Could not read the form.')); return; }
+  const set = (name, val) => { const el = document.querySelector(`#resident-form [name="${name}"]`); if (el && val!=null && val!=='') el.value = val; };
+  set('name', info.fullName);
+  set('phone', info.phone);
+  set('email', info.email);
+  set('monthlyRent', info.monthlyRent);
+  set('joinDate', info.joinDate);
+  set('nid', info.nid);
+  set('address', info.address);
+  set('guardianName', info.guardianName);
+  set('guardianPhone', info.guardianPhone);
+  set('occupation', info.occupation);
+  set('notes', info.notes);
+  const roomSel = $('#rf-room');
+  if (roomSel && info.room){ roomSel.value = info.room; roomSel.dispatchEvent(new Event('change', {bubbles:true})); }
+  if (info.seat){ setTimeout(()=>{ const seatSel = $('#rf-seat'); if (seatSel) seatSel.value = info.seat; }, 60); }
+  toast(t('Form scanned — filling the form.'));
+  setTimeout(()=>{ const f = $('#resident-form'); if (f) f.requestSubmit(); }, 900);
 }
 
 function speak(text){
