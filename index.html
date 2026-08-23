@@ -555,7 +555,7 @@ const I18N = {
     'Rent is set automatically from the room.':'রেন্ট রুম অনুযায়ী স্বয়ংক্রিয়ভাবে সেট হয়।',
     'No rooms available yet.':'এখনও কোন রুম নেই।','NID / Passport number':'এনআইডি / পাসপোর্ট নম্বর','Present address':'বর্তমান ঠিকানা','Guardian name':'অভিভাবকের নাম','Guardian phone':'অভিভাবকের ফোন',
     'Upload file':'ফাইল আপলোড','No files added yet.':'এখনও কোন ফাইল যোগ হয়নি।','Edit resident':'বাসিন্দা সম্পাদনা',
-    'Scan form':'ফর্ম স্ক্যান করুন','Scan admission form (Bangla)':'ভর্তি ফর্ম স্ক্যান করুন (বাংলা)','Scanning…':'স্ক্যান হচ্ছে…',
+    'Scan form':'ফর্ম স্ক্যান করুন','Scan admission form':'ভর্তি ফর্ম স্ক্যান করুন','Scanning…':'স্ক্যান হচ্ছে…',
     'Form scanned — filling the form.':'ফর্ম স্ক্যান হয়েছে — ফর্ম পূরণ হচ্ছে।','Could not read the form.':'ফর্ম পড়া যায়নি।','No text found on the form.':'ফর্মে কোন তথ্য পাওয়া যায়নি।',
     'Pick a photo of the admission form':'ভর্তি ফর্মের ছবি বাছাই করুন','the AI reads it and fills the form automatically.':'AI ছবিটি পড়ে ফর্ম স্বয়ংক্রিয়ভাবে পূরণ করে।',
     'PDF, PNG, JPG or similar. Keep files modest in size — see Settings → Cloud sync for the limit.':'PDF, PNG, JPG বা অনুরূপ। ফাইলের আকার ছোট রাখুন — সীমার জন্য সেটিংস → ক্লাউড সিঙ্ক দেখুন।',    'incl. current':'বর্তমান সহ','current':'বর্তমান',
@@ -1013,7 +1013,7 @@ function renderResidentForm(id){
     </div>
     <form id="resident-form">
       <div class="card" style="margin-bottom:12px; border:none; border-radius:12px; background:color-mix(in srgb, var(--orchid-tint) 40%, transparent);">
-        <div style="font-size:13px; font-weight:600; margin-bottom:8px; color:#ffffff;">📷 ${t('Scan admission form (Bangla)')}</div>
+        <div style="font-size:13px; font-weight:600; margin-bottom:8px; color:#ffffff;">📷 ${t('Scan admission form')}</div>
         <button class="btn btn-primary btn-sm" id="btn-scan-form" type="button" style="opacity:1;">📷 ${t('Scan form')}</button>
         <input type="file" id="scan-form-input" accept="image/*" class="hidden" />
         <div class="help" style="margin-top:6px;">${t('Pick a photo of the admission form')} — ${t('the AI reads it and fills the form automatically.')}</div>
