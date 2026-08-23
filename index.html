@@ -545,7 +545,7 @@ const I18N = {
     'Right now data is stored only on this device (Local mode). Paste a Firebase project config below to sync to the cloud for free — see the README for the 5-minute setup.':'এখন ডেটা শুধু এই ডিভাইসে সংরক্ষিত (লোকাল মোড)। ক্লাউডে বিনামূল্যে সিঙ্ক করতে নিচে একটি ফায়ারবেস কনফিগ দিন — ৫-মিনিটের সেটআপের জন্য README দেখুন।',
     'Optional 4-digit PIN so residents\' data isn\'t visible if someone picks up this device.':'ঐচ্ছিক ৪-সংখ্যার PIN, যাতে কেউ ডিভাইসটি নিলে বাসিন্দাদের তথ্য দেখা না যায়।',
     'Get a free API key at aistudio.google.com → "Get API key". It stays on this device only.':'aistudio.google.com থেকে ফ্রি API কী নিন → "Get API key"। এটি শুধু এই ডিভাইসে থাকে।',
-    'Full name *':'পূর্ণ নাম *','Join date':'যোগদানের তারিখ','Room no.':'রুম নং','select':'নির্বাচন করুন','— Select room first —':'— আগে রুম বাছাই করুন —',
+    'Full name *':'পূর্ণ নাম *','Join date':'যোগদানের তারিখ','Room no.':'রুম নং',    'select':'নির্বাচন করুন','Please select a room.':'একটি রুম নির্বাচন করুন।','— Select room first —':'— আগে রুম বাছাই করুন —',
     'Rent is set automatically from the room.':'রেন্ট রুম অনুযায়ী স্বয়ংক্রিয়ভাবে সেট হয়।',
     'No rooms available yet.':'এখনও কোন রুম নেই।','NID / Passport number':'এনআইডি / পাসপোর্ট নম্বর','Present address':'বর্তমান ঠিকানা','Guardian name':'অভিভাবকের নাম','Guardian phone':'অভিভাবকের ফোন',
     'Upload file':'ফাইল আপলোড','No files added yet.':'এখনও কোন ফাইল যোগ হয়নি।','Edit resident':'বাসিন্দা সম্পাদনা',
@@ -1024,8 +1024,8 @@ function renderResidentForm(id){
 
       <div class="field-row">
         <div class="field"><label>${t('Room no.')}</label>
-          <select id="rf-room" name="room">
-            <option value="">${t('select')}</option>
+          <select id="rf-room" name="room" required>
+            <option value="">-- Select --</option>
             ${roomOptions}
           </select>
         </div>
@@ -1528,6 +1528,11 @@ function bindViewEvents(){
       const saved = await DB.saveResident(r);
 
       const chosenRoom = fd.get('room') || '';
+      if (!chosenRoom){
+        toast(t('Please select a room.'));
+        const rs = $('#rf-room'); if (rs){ rs.focus(); rs.scrollIntoView({block:'center'}); }
+        return;
+      }
       const chosenSeatLabel = fd.get('seatLabel') || '';
       const prevSeat = residentSeat(saved.id);
       if (chosenRoom && chosenSeatLabel){
