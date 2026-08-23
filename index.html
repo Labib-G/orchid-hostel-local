@@ -531,7 +531,7 @@ const I18N = {
     'Upload a photo ID, biodata form, or agreement.':'একটি ফটো আইডি, বায়োডাটা ফর্ম বা চুক্তিপত্র আপলোড করুন।',
     'Vacate seat':'আসন খালি করুন','Assign seat':'আসন বরাদ্দ করুন','Delete resident':'বাসিন্দা মুছুন',
     'Trash is empty':'ট্রাশ খালি','Restore':'ফিরিয়ে আনুন','Delete now':'এখন মুছুন',
-    'day left':'দিন বাকি','days left':'দিন বাকি','View':'দেখুন','Remove':'সরান','No seat':'কোন আসন নেই',
+    'day left':'দিন বাকি','days left':'দিন বাকি','View':'দেখুন','Remove':'সরান',    'No empty seats in this room':'এই রুমে কোন খালি আসন নেই।','No seat':'কোন আসন নেই',
     'Paid this month':'এই মাসে পরিশোধিত','Partial due':'আংশিক বকেয়া','Due this month':'এই মাসে বকেয়া',
     'Phone':'ফোন','Email':'ইমেইল','NID / Passport':'এনআইডি / পাসপোর্ট','Monthly rent':'মাসিক ভাড়া',
     'Guardian':'অভিভাবক','Address':'ঠিকানা','Occupation / Institution':'পেশা / প্রতিষ্ঠান','Joined':'যোগদান','Notes':'নোট',
@@ -1649,11 +1649,16 @@ function bindViewEvents(){
 }
 function populateSeatSelect(room, residentId, preselectLabel){
   const sel = $('#rf-seat'); if (!sel) return;
-  if (!room){ sel.innerHTML = '<option value="">— Select room first —</option>'; sel.disabled = true; return; }
-  const avail = state.seats.filter(s=>s.room===room && (!s.residentId || s.residentId===residentId));
-  if (avail.length===0){ sel.innerHTML = '<option value="">No empty seats in this room</option>'; sel.disabled = true; return; }
+  if (!room){ sel.innerHTML = '<option value="">'+t('— Select room first —')+'</option>'; sel.disabled = true; return; }
+  const isAdd = !residentId;
+  // Add flow: show ONLY truly empty seats. Edit flow: empty seats + this resident's current seat.
+  const options = state.seats.filter(s=>s.room===room && (!s.residentId || (residentId && s.residentId===residentId)));
+  if (options.length===0){
+    sel.innerHTML = '<option value="">'+t('No empty seats in this room')+'</option>';
+    sel.disabled = true; return;
+  }
   sel.disabled = false;
-  const sorted = avail.slice().sort((a,b)=>a.seatLabel.localeCompare(b.seatLabel,undefined,{numeric:true}));
+  const sorted = options.slice().sort((a,b)=>a.seatLabel.localeCompare(b.seatLabel,undefined,{numeric:true}));
   const autoLabel = preselectLabel || sorted.find(s=>!s.residentId)?.seatLabel || sorted[0]?.seatLabel || '';
   sel.innerHTML = sorted.map(s=>
     `<option value="${esc(s.seatLabel)}" ${s.seatLabel===autoLabel?'selected':''}>${esc(s.seatLabel)}${s.residentId?' (current)':''}</option>`
