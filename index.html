@@ -261,6 +261,7 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
 .btn-primary{background:var(--orchid); color:#fff;}
 .btn-primary:active{background:var(--orchid-deep);}
 .btn-ghost{background:var(--paper-alt); color:var(--ink);}
+.btn-accent-orchid{background:linear-gradient(135deg,#043D2C,#0A5E45,#0E9F6E); background-size:200% 200%; animation:orchidShift 5s ease-in-out infinite; border:none; color:#fff;}
 .btn-outline{background:none; border:1.5px solid var(--border); color:var(--ink);}
 .btn-danger{background:var(--rust-tint); color:var(--rust);}
 .btn-sm{width:auto; padding:8px 13px; font-size:12.5px; border-radius:10px;}
@@ -694,7 +695,7 @@ function renderDashboard(){
 
     <div class="section-title"><h2>Quick actions</h2></div>
     <div class="btn-row" style="margin-top:0;">
-      <button class="btn btn-ghost" data-nav="residentForm">＋ Add resident</button>
+      <button class="btn btn-accent-orchid" data-nav="residentForm">＋ Add resident</button>
     </div>
   `;
 }
