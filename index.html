@@ -1012,7 +1012,7 @@ function renderResidentForm(id){
       <h2 style="font-size:17px;">${r?t('Edit resident'):t('Add resident')}</h2>
     </div>
     <form id="resident-form">
-      <div class="card" style="margin-bottom:12px; border:none; border-radius:12px; background:var(--orchid-tint);">
+      <div class="card" style="margin-bottom:12px; border:none; border-radius:12px; background:color-mix(in srgb, var(--orchid-tint) 40%, transparent);">
         <div style="font-size:13px; font-weight:600; margin-bottom:8px; color:var(--orchid); display:flex; align-items:center; gap:6px;">📷 ${t('Scan admission form (Bangla)')}</div>
         <button class="btn btn-outline btn-sm" id="btn-scan-form" type="button">📷 ${t('Scan form')}</button>
         <input type="file" id="scan-form-input" accept="image/*" class="hidden" />
