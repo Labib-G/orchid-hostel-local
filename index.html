@@ -554,6 +554,7 @@ const I18N = {
     'Full name *':'পূর্ণ নাম *','Join date':'যোগদানের তারিখ','Room no.':'রুম নং',    'select':'নির্বাচন করুন','Please select a room.':'একটি রুম নির্বাচন করুন।','— Select room first —':'— আগে রুম বাছাই করুন —',
     'Rent is set automatically from the room.':'রেন্ট রুম অনুযায়ী স্বয়ংক্রিয়ভাবে সেট হয়।',
     'No rooms available yet.':'এখনও কোন রুম নেই।','NID / Passport number':'এনআইডি / পাসপোর্ট নম্বর','Present address':'বর্তমান ঠিকানা','Guardian name':'অভিভাবকের নাম','Guardian phone':'অভিভাবকের ফোন',
+    'Phone *':'ফোন *','Present address *':'বর্তমান ঠিকানা *','Guardian name *':'অভিভাবকের নাম *','Guardian phone *':'অভিভাবকের ফোন *','NID / Passport / Birth certificate number *':'এনআইডি / পাসপোর্ট / জন্ম নিবন্ধনপত্র নম্বর *',
     'Upload file':'ফাইল আপলোড','No files added yet.':'এখনও কোন ফাইল যোগ হয়নি।','Edit resident':'বাসিন্দা সম্পাদনা',
     'Scan form':'ফর্ম স্ক্যান করুন','Scan admission form':'ভর্তি ফর্ম স্ক্যান করুন','Scanning…':'স্ক্যান হচ্ছে…',
     'Form scanned — filling the form.':'ফর্ম স্ক্যান হয়েছে — ফর্ম পূরণ হচ্ছে।','Could not read the form.':'ফর্ম পড়া যায়নি।','No text found on the form.':'ফর্মে কোন তথ্য পাওয়া যায়নি।',
@@ -1020,7 +1021,7 @@ function renderResidentForm(id){
       </div>
       <div class="field"><label>${t('Full name *')}</label><input name="name" required value="${esc(r?.name||'')}" /></div>
       <div class="field-row">
-        <div class="field"><label>${t('Phone')}</label><input name="phone" value="${esc(r?.phone||'')}" /></div>
+        <div class="field"><label>${t('Phone *')}</label><input name="phone" required value="${esc(r?.phone||'')}" /></div>
         <div class="field"><label>${t('Email')}</label><input name="email" type="email" value="${esc(r?.email||'')}" /></div>
       </div>
       <div class="field-row">
@@ -1042,11 +1043,11 @@ function renderResidentForm(id){
       </div>
       ${roomNames.length===0 ? `<div class="help" style="margin-top:-8px;">${t('No rooms available yet.')}</div>` : ''}
 
-      <div class="field"><label>${t('NID / Passport number')}</label><input name="nid" value="${esc(r?.nid||'')}" /></div>
-      <div class="field"><label>${t('Present address')}</label><textarea name="address" rows="2">${esc(r?.address||'')}</textarea></div>
+      <div class="field"><label>${t('NID / Passport / Birth certificate number *')}</label><input name="nid" required value="${esc(r?.nid||'')}" /></div>
+      <div class="field"><label>${t('Present address *')}</label><textarea name="address" required rows="2">${esc(r?.address||'')}</textarea></div>
       <div class="field-row">
-        <div class="field"><label>${t('Guardian name')}</label><input name="guardianName" value="${esc(r?.guardianName||'')}" /></div>
-        <div class="field"><label>${t('Guardian phone')}</label><input name="guardianPhone" value="${esc(r?.guardianPhone||'')}" /></div>
+        <div class="field"><label>${t('Guardian name *')}</label><input name="guardianName" required value="${esc(r?.guardianName||'')}" /></div>
+        <div class="field"><label>${t('Guardian phone *')}</label><input name="guardianPhone" required value="${esc(r?.guardianPhone||'')}" /></div>
       </div>
       <div class="field"><label>${t('Occupation / Institution')}</label><input name="occupation" value="${esc(r?.occupation||'')}" /></div>
       <div class="field"><label>${t('Notes')}</label><textarea name="notes" rows="2">${esc(r?.notes||'')}</textarea></div>
