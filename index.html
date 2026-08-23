@@ -988,8 +988,11 @@ function renderTrash(){
 function renderResidentForm(id){
   const r = id ? state.residents.find(x=>x.id===id) : null;
   const currentSeat = r ? residentSeat(r.id) : null;
-  const roomNames = [...new Set(state.seats.map(s=>s.room))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
   const emptyCount = room => state.seats.filter(s=>s.room===room && !s.residentId).length;
+  const addingNew = !id;
+  const roomNames = [...new Set(state.seats.map(s=>s.room))]
+    .filter(room => !addingNew || emptyCount(room) > 0 || (currentSeat && currentSeat.room===room))
+    .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
   const roomOptions = roomNames.map(room => {
     const n = emptyCount(room);
     const isCurrent = currentSeat && currentSeat.room===room;
