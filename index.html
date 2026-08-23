@@ -552,7 +552,7 @@ const I18N = {
     'Scan form':'ফর্ম স্ক্যান করুন','Scan admission form (Bangla)':'ভর্তি ফর্ম স্ক্যান করুন (বাংলা)','Scanning…':'স্ক্যান হচ্ছে…',
     'Form scanned — filling the form.':'ফর্ম স্ক্যান হয়েছে — ফর্ম পূরণ হচ্ছে।','Could not read the form.':'ফর্ম পড়া যায়নি।','No text found on the form.':'ফর্মে কোন তথ্য পাওয়া যায়নি।',
     'Pick a photo of the admission form':'ভর্তি ফর্মের ছবি বাছাই করুন','the AI reads it and fills the form automatically.':'AI ছবিটি পড়ে ফর্ম স্বয়ংক্রিয়ভাবে পূরণ করে।',
-    'PDF, PNG, JPG or similar. Keep files modest in size — see Settings → Cloud sync for the limit.':'PDF, PNG, JPG বা অনুরূপ। ফাইলের আকার ছোট রাখুন — সীমার জন্য সেটিংস → ক্লাউড সিঙ্ক দেখুন।','incl. current':'বর্তমান সহ',
+    'PDF, PNG, JPG or similar. Keep files modest in size — see Settings → Cloud sync for the limit.':'PDF, PNG, JPG বা অনুরূপ। ফাইলের আকার ছোট রাখুন — সীমার জন্য সেটিংস → ক্লাউড সিঙ্ক দেখুন।',    'incl. current':'বর্তমান সহ','current':'বর্তমান',
     'No rooms yet':'এখনও কোন রুম নেই','Empty seats':'খালি আসন','All seats filled':'সব আসন পূর্ণ','Every seat has a resident.':'প্রতিটি আসনে একজন বাসিন্দা আছে।',
   }
 };
@@ -996,7 +996,7 @@ function renderResidentForm(id){
   const roomOptions = roomNames.map(room => {
     const n = emptyCount(room);
     const isCurrent = currentSeat && currentSeat.room===room;
-    return `<option value="${esc(room)}" ${isCurrent?'selected':''}>${esc(room)} (${n} ${t('empty')}${isCurrent?', '+t('incl. current'):''})</option>`;
+    return `<option value="${esc(room)}" ${isCurrent?'selected':''}>${esc(room)} (${n} ${t('empty')})${isCurrent?' · '+t('current'):''}</option>`;
   }).join('');
 
   return `
