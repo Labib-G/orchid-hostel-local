@@ -1012,9 +1012,9 @@ function renderResidentForm(id){
       <h2 style="font-size:17px;">${r?t('Edit resident'):t('Add resident')}</h2>
     </div>
     <form id="resident-form">
-      <div class="card" style="margin-bottom:12px; border-color:transparent; background:var(--paper-alt);">
-        <div style="font-size:13px; font-weight:600; margin-bottom:8px;">${t('Scan admission form (Bangla)')}</div>
-        <button class="btn btn-outline btn-sm" id="btn-scan-form" type="button">📷 ${t('Scan form')}</button>
+      <div class="card" style="margin-bottom:12px; border:1.5px solid var(--orchid); background:var(--paper-alt); border-radius:12px;">
+        <div style="font-size:13px; font-weight:600; margin-bottom:8px; color:var(--orchid); display:flex; align-items:center; gap:6px;">📷 ${t('Scan admission form (Bangla)')}</div>
+        <button class="btn btn-primary btn-sm" id="btn-scan-form" type="button">📷 ${t('Scan form')}</button>
         <input type="file" id="scan-form-input" accept="image/*" class="hidden" />
         <div class="help" style="margin-top:6px;">${t('Pick a photo of the admission form')} — ${t('the AI reads it and fills the form automatically.')}</div>
       </div>
