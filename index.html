@@ -1018,7 +1018,7 @@ function renderResidentForm(id){
       </div>
       <div class="field-row">
         <div class="field"><label>${t('Monthly rent')} (${esc(state.settings.currency)})</label><input name="monthlyRent" type="number" min="0" value="${r?.monthlyRent||''}" readonly /></div>
-        <div class="field"><label>${t('Join date')}</label><input name="joinDate" type="date" value="${r?.joinDate||todayISO()}" /></div>
+        <div class="field"><label>${t('Join date')}</label><input name="joinDate" type="date" value="${r?.joinDate||todayISO()}" min="${todayISO()}" max="${(new Date(Date.now()+90*86400000)).toISOString().slice(0,10)}" /></div>
       </div>
       <div class="help" style="margin-top:-8px;">${t('Rent is set automatically from the room.')}</div>
 
