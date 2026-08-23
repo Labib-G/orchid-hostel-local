@@ -115,15 +115,22 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
 .brand{display:flex; align-items:center; gap:9px;}
 .brand-mark{width:26px;height:26px;flex:none;}
 .brand-name{font-family:var(--font-display); font-weight:700; font-size:19px; letter-spacing:.2px;}
-.topbar-actions{display:flex; align-items:center; gap:8px;}
-.sync-pill{
-  font-family:var(--font-mono); font-size:11px; padding:5px 10px; border-radius:var(--radius-pill);
-  background:var(--paper-alt); color:var(--ink-soft); border:1px solid var(--border);
-  display:flex; align-items:center; gap:5px; cursor:pointer;
+.topbar-actions{display:flex; align-items:center; gap:8px; position:relative;}
+.lang-switch{
+  font-family:var(--font-mono); font-size:12px; font-weight:600; padding:6px 10px; border-radius:var(--radius-pill);
+  background:var(--paper-alt); color:var(--ink); border:1px solid var(--border);
+  display:flex; align-items:center; gap:6px; cursor:pointer;
 }
-.sync-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--ink-faint);}
-.sync-pill.cloud .dot{background:var(--green);}
-.sync-pill.err .dot{background:var(--rust);}
+.lang-switch .dot{width:6px;height:6px;border-radius:50%;background:var(--ink-faint);}
+.lang-switch .dot.on{background:var(--green);}
+.lang-switch svg{width:13px;height:13px;}
+.lang-menu{
+  position:absolute; right:0; top:calc(100% + 6px); background:var(--paper); border:1px solid var(--border);
+  border-radius:12px; box-shadow:0 14px 34px -14px rgba(0,0,0,.4); padding:6px; min-width:170px; z-index:60;
+}
+.lang-menu .lang-opt{display:block; width:100%; text-align:left; border:none; background:none; padding:10px 10px; border-radius:8px; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer;}
+.lang-menu .lang-opt:hover{background:var(--paper-alt);}
+.lang-menu .lang-opt.active{background:var(--paper-alt); color:var(--orchid);}
 
 .view-root{ flex:1; padding:16px 16px 100px; overflow-y:auto; }
 
@@ -346,8 +353,8 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
 
 <div id="lock-screen" class="lock-screen hidden">
   <div class="lock-box">
-    <h2 style="margin-bottom:6px;">Enter PIN</h2>
-    <p class="muted" style="font-size:13px;">Orchid Hostel is locked</p>
+    <h2 style="margin-bottom:6px;" data-i18n="Enter PIN">Enter PIN</h2>
+    <p class="muted" style="font-size:13px;" data-i18n="Orchid Hostel is locked">Orchid Hostel is locked</p>
     <div class="pin-dots" id="pin-dots"></div>
     <div class="pin-pad" id="pin-pad"></div>
   </div>
@@ -355,16 +362,16 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
 
 <div id="signin-screen" class="signin-screen hidden">
   <div class="signin-box">
-    <h2 style="margin-bottom:6px;">Sign in</h2>
-    <p class="muted" style="font-size:13px; margin-bottom:18px;">Cloud sync is on for this hostel. Sign in with the admin account to continue.</p>
-    <div class="field"><label>Email</label><input id="si-email" type="email" autocomplete="username" /></div>
-    <div class="field"><label>Password</label><input id="si-pass" type="password" autocomplete="current-password" /></div>
+    <h2 style="margin-bottom:6px;" data-i18n="Sign in">Sign in</h2>
+    <p class="muted" style="font-size:13px; margin-bottom:18px;" data-i18n="Cloud sync is on for this hostel. Sign in with the admin account to continue.">Cloud sync is on for this hostel. Sign in with the admin account to continue.</p>
+    <div class="field"><label data-i18n="Email">Email</label><input id="si-email" type="email" autocomplete="username" /></div>
+    <div class="field"><label data-i18n="Password">Password</label><input id="si-pass" type="password" autocomplete="current-password" /></div>
     <div id="si-error" class="muted" style="color:var(--rust); font-size:12.5px; margin-bottom:8px;"></div>
     <div class="btn-row">
-      <button class="btn btn-outline" id="si-create">Create account</button>
-      <button class="btn btn-primary" id="si-signin">Sign in</button>
+      <button class="btn btn-outline" id="si-create" data-i18n="Create account">Create account</button>
+      <button class="btn btn-primary" id="si-signin" data-i18n="Sign in">Sign in</button>
     </div>
-    <button class="link-btn" id="si-use-local" style="margin-top:14px;">Use offline mode on this device instead</button>
+    <button class="link-btn" id="si-use-local" style="margin-top:14px;" data-i18n="Use offline mode on this device instead">Use offline mode on this device instead</button>
   </div>
 </div>
 
@@ -374,7 +381,12 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
       <span class="brand-name" id="brand-name">Orchid Hostel</span>
     </div>
     <div class="topbar-actions">
-      <button class="sync-pill" id="sync-pill"><span class="dot"></span><span id="sync-label">Local</span></button>
+      <button class="lang-switch" id="lang-switch" aria-label="Language">
+        <span class="dot" id="sync-dot"></span>
+        <span id="lang-label">EN</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="lang-menu hidden" id="lang-menu"></div>
     </div>
   </header>
 
@@ -387,23 +399,23 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
   <nav class="tabbar" id="tabbar">
     <button class="tab active" data-view="dashboard">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
-      Home<span class="tab-dot"></span>
+      <span data-i18n="Home">Home</span><span class="tab-dot"></span>
     </button>
     <button class="tab" data-view="residents">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c1-3.6 3.3-5.4 5.5-5.4s4.5 1.8 5.5 5.4"/><circle cx="17" cy="8.5" r="2.4"/><path d="M15.8 14.8c2 .3 3.6 2 4.3 4.6"/></svg>
-      Residents<span class="tab-dot"></span>
+      <span data-i18n="Residents">Residents</span><span class="tab-dot"></span>
     </button>
     <button class="tab" data-view="seats">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="7" height="7" rx="1.5"/><rect x="13" y="3" width="7" height="7" rx="1.5"/><rect x="4" y="14" width="7" height="7" rx="1.5"/><rect x="13" y="14" width="7" height="7" rx="1.5"/></svg>
-      Seats<span class="tab-dot"></span>
+      <span data-i18n="Seats">Seats</span><span class="tab-dot"></span>
     </button>
     <button class="tab" data-view="dues">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>
-      Dues<span class="tab-dot"></span>
+      <span data-i18n="Dues">Dues</span><span class="tab-dot"></span>
     </button>
     <button class="tab" data-view="settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.7 7.7 0 0 0 0-3l1.9-1.5-2-3.4-2.2.9a7.6 7.6 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.5a7.6 7.6 0 0 0-2.6 1.5l-2.2-.9-2 3.4L4.6 10.5a7.7 7.7 0 0 0 0 3L2.7 15l2 3.4 2.2-.9c.8.7 1.6 1.2 2.6 1.5l.5 2.5h4l.5-2.5a7.6 7.6 0 0 0 2.6-1.5l2.2.9 2-3.4-1.9-1.5Z"/></svg>
-      Settings<span class="tab-dot"></span>
+      <span data-i18n="Settings">Settings</span><span class="tab-dot"></span>
     </button>
   </nav>
 </div>
@@ -446,7 +458,139 @@ const LS = {
 };
 function lsGet(k, fb){ try{ const v = localStorage.getItem(k); return v===null ? fb : JSON.parse(v); }catch(e){ return fb; } }
 function lsSet(k, v){ localStorage.setItem(k, JSON.stringify(v)); }
-function defaultSettings(){ return { hostelName:'Orchid Hostel', currency:'৳', lastGeneratedMonth:'', voiceLang:'en-US' }; }
+function defaultSettings(){ return { hostelName:'Orchid Hostel', currency:'৳', lastGeneratedMonth:'', voiceLang:'en-US', uiLang:'en' }; }
+
+/* ---------- i18n (full UI translation) ----------
+   Strings are looked up by their English text. Untranslated strings fall back to English,
+   so the app always renders something sensible. */
+const LANGS = {
+  en: { code:'en', native:'English' },
+  bn: { code:'bn', native:'বাংলা (বাংলাদেশ)' }
+};
+const I18N = {
+  bn: {
+    'Home':'হোম','Residents':'বাসিন্দারা','Seats':'আসন','Dues':'বকেয়া','Settings':'সেটিংস',
+    'Total due':'মোট বকেয়া','PREVIOUS DUES':'আগের বকেয়া','NO PREVIOUS DUES':'কোন আগের বকেয়া নেই',
+    'Money received':'প্রাপ্ত অর্থ','Seats empty':'খালি আসন','Residents with dues':'বকেয়াযুক্ত বাসিন্দারা',
+    'See all':'সব দেখুন','All caught up':'সব ঠিক আছে','No pending dues this month.':'এই মাসে কোন বকেয়া নেই।',
+    'Quick actions':'দ্রুত কাজ','Add Resident':'বাসিন্দা যোগ করুন',
+    'Search by name, phone, or room no.':'নাম, ফোন বা রুম নম্বর দিয়ে খুঁজুন',
+    'All':'সব','Active':'সক্রিয়','Due':'বকেয়া','Paid':'পরিশোধিত','Left':'চলে গেছে',
+    'No residents yet':'এখনও কোন বাসিন্দা নেই','Add your first resident to get started.':'শুরু করতে আপনার প্রথম বাসিন্দা যোগ করুন।',
+    'Add':'যোগ করুন','match':'মিল','matches':'মিল','room, name, or phone containing':'রুম, নাম বা ফোন যাতে আছে',
+    'Trash':'ট্রাশ',
+    'Empty first':'আগে খালি','Occupied first':'আগে দখলকৃত','Floors':'তলা','Bed type':'বিছানার ধরন',
+    'No matches':'কোন মিল নেই','Nothing found for that search.':'ঐ অনুসন্ধানে কিছু পাওয়া যায়নি।',
+    'No rooms yet':'এখনও কোন রুম নেই','Rooms will appear here once added.':'রুম যোগ করলে এখানে দেখা যাবে।','occupied':'দখলকৃত','empty':'খালি',
+    'Room':'রুম','Floor':'তলা','Search room no., name, or phone':'রুম নং, নাম বা ফোন দিয়ে খুঁজুন',
+    'Collected':'আদায়','Outstanding':'বাকি',
+    'resident(s) have no due entry for':'জন বাসিন্দার জন্য কোন বকেয়া এন্ট্রি নেই',
+    'Generate this month\'s dues':'এই মাসের বকেয়া তৈরি করুন',
+    'Hostel name':'হোস্টেলের নাম','Currency symbol':'মুদ্রার চিহ্ন','Voice command language':'ভয়েস কমান্ড ভাষা',
+    'Save':'সংরক্ষণ','Gemini voice assistant':'জেমিনি ভয়েস সহকারী','Gemini API key':'জেমিনি API কী',
+    'Cloud sync':'ক্লাউড সিঙ্ক','Firebase config (JSON)':'ফায়ারবেস কনফিগ (JSON)',
+    'Connect':'সংযুক্ত করুন','Reconnect':'পুনঃসংযোগ','Disconnect':'সংযোগ বিচ্ছিন্ন','Sign out':'সাইন আউট',
+    'Save key':'কী সংরক্ষণ',
+    'App lock':'অ্যাপ লক','Set PIN':'PIN সেট করুন','Change PIN':'PIN পরিবর্তন','Remove PIN':'PIN সরান',
+    'Data':'ডেটা','Export backup (.json)':'ব্যাকআপ এক্সপোর্ট (.json)','Import':'ইমপোর্ট',
+    'Transactions':'লেনদেন','No transactions yet':'এখনও কোন লেনদেন নেই',
+    'Every time the admin marks a resident as paid for a month, it\'s recorded here.':'যখনই অ্যাডমিন কোন বাসিন্দাকে এক মাসের জন্য পরিশোধিত চিহ্নিত করেন, তা এখানে রেকর্ড হয়।',
+    'not marked paid':'পরিশোধিত চিহ্নিত হয়নি',
+    'All seats filled':'সব আসন পূর্ণ','Every seat has a resident.':'প্রতিটি আসনে একজন বাসিন্দা আছে।',
+    'Edit':'সম্পাদনা','Record payment':'পেমেন্ট রেকর্ড','Contact':'যোগাযোগ','Monthly rent':'মাসিক ভাড়া',
+    'Notes':'নোট','ID / Documents':'আইডি / ডকুমেন্ট','Payment history':'পেমেন্ট ইতিহাস','Mark left':'চলে গেছে চিহ্নিত করুন','Delete':'মুছুন',
+    'No seat assigned':'কোন আসন বরাদ্দ নেই','No entries yet':'এখনও কোন এন্ট্রি নেই',
+    'Add resident':'বাসিন্দা যোগ করুন','Save changes':'পরিবর্তন সংরক্ষণ','Name':'নাম','Phone':'ফোন','Room':'রুম','Seat':'আসন',
+    'Amount due':'প্রাপ্য অঙ্ক','Amount paid':'পরিশোধিত অঙ্ক','Status':'অবস্থা','Note':'নোট','Partial':'আংশিক',
+    'Save payment':'পেমেন্ট সংরক্ষণ','Paid in full':'পুরো পরিশোধ','Mark as paid':'পরিশোধিত চিহ্নিত করুন','Add note':'নোট যোগ করুন',
+    'View resident':'বাসিন্দা দেখুন','Vacate':'খালি করুন','No unassigned residents.':'কোন বরাদ্দ-বিহীন বাসিন্দা নেই।','Add a new resident':'নতুন বাসিন্দা যোগ করুন','Assign resident':'বাসিন্দা বরাদ্দ','Month':'মাস','Amount paid now':'এখন পরিশোধিত অঙ্ক',
+    'Resident added.':'বাসিন্দা যোগ হয়েছে।','Resident updated.':'বাসিন্দা আপডেট হয়েছে।','Payment recorded.':'পেমেন্ট রেকর্ড হয়েছে।',
+    'Seat assigned.':'আসন বরাদ্দ হয়েছে।','Saved.':'সংরক্ষিত।','PIN set.':'PIN সেট হয়েছে।','PIN removed.':'PIN সরানো হয়েছে।',
+    'Settings saved.':'সেটিংস সংরক্ষিত।','Resident restored.':'বাসিন্দা ফিরিয়ে আনা হয়েছে।',
+    'Pin incorrect.':'PIN ভুল।',    'Enter PIN':'PIN লিখুন','Sign in':'সাইন ইন','Password':'পাসওয়ার্ড','Create account':'অ্যাকাউন্ট তৈরি করুন',
+    'Use offline mode on this device instead':'এর পরিবর্তে এই ডিভাইসে অফলাইন মোড ব্যবহার করুন',
+    'Cloud sync is on for this hostel. Sign in with the admin account to continue.':'এই হোস্টেলের ক্লাউড সিঙ্ক চালু আছে। চালিয়ে যেতে অ্যাডমিন অ্যাকাউন্ট দিয়ে সাইন ইন করুন।','Unlock':'আনলক',
+    'Listening...':'শুনছে...','Tap to talk':'কথা বলতে ট্যাপ করুন',
+    'Listening…':'শুনছে…','Or type a command…':'অথবা একটি কমান্ড লিখুন…','Send':'পাঠান',    'Set a 4-digit PIN':'৪-সংখ্যার PIN সেট করুন','Could not hear you — try typing instead':'আপনার কথা শোনা যায়নি — টাইপ করে চেষ্টা করুন',
+    'Resident saved — synced and room assignment updated.':'বাসিন্দা সংরক্ষিত — সিঙ্ক ও রুম বরাদ্দ আপডেট হয়েছে।',
+    'Moved to trash.':'ট্রাশে সরানো হয়েছে।','Seat vacated.':'আসন খালি করা হয়েছে।','Tap an empty seat to assign this resident.':'এই বাসিন্দাকে বরাদ্দ করতে একটি খালি আসনে ট্যাপ করুন।',
+    'Uploading…':'আপলোড হচ্ছে…','File added.':'ফাইল যোগ হয়েছে।','Resident restored — unassigned, ready to add back to a room.':'বাসিন্দা ফিরিয়ে আনা হয়েছে — বরাদ্দমুক্ত, রুমে যোগ করতে প্রস্তুত।',
+    'Permanently deleted.':'স্থায়ীভাবে মোছা হয়েছে।','Dues generated for this month.':'এই মাসের বকেয়া তৈরি হয়েছে।','Saved.':'সংরক্ষিত।',
+    'Gemini key saved on this device.':'জেমিনি কী এই ডিভাইসে সংরক্ষিত হয়েছে।','That does not look like valid JSON.':'এটি বৈধ JSON মনে হচ্ছে না।','Connecting…':'সংযোগ হচ্ছে…',
+    'PIN removed.':'PIN সরানো হয়েছে।','Wrong PIN.':'ভুল PIN.',
+    'Could not connect to Firebase — check the config in Settings.':'ফায়ারবেসের সাথে সংযোগ করা যায়নি — সেটিংসে কনফিগ যাচাই করুন।','Import complete.':'ইমপোর্ট সম্পন্ন।','Could not read that file.':'ফাইলটি পড়া যায়নি।','Type a command below':'নিচে একটি কমান্ড লিখুন',
+    'Voice input needs Chrome on Android. You can still type a command.':'ভয়েস ইনপুটের জন্য অ্যান্ড্রয়েডে ক্রোম প্রয়োজন। আপনি তবুও কমান্ড লিখতে পারেন।',
+    'Add a free Gemini API key in Settings first.':'আগে সেটিংসে একটি ফ্রি জেমিনি API কী যোগ করুন।',
+    'Move this resident to Trash? Their seat will be freed right away. You can restore them any time within':'এই বাসিন্দাকে ট্রাশে সরাবেন? তাদের আসন তৎক্ষণাৎ খালি হবে। আপনি',' days.':' দিনের মধ্যে যেকোন সময় ফিরিয়ে আনতে পারবেন।',
+    'Permanently delete this record right now? This cannot be undone.':'এই রেকর্ডটি এখনই স্থায়ীভাবে মুছবেন? এটি ফেরানো যাবে না।',
+    'Disconnect cloud sync? This device will go back to local-only storage.':'ক্লাউড সিঙ্ক বিচ্ছিন্দ করবেন? এই ডিভাইস আবার শুধু-লোকাল স্টোরেজে ফিরে যাবে।',
+    'Import will merge this backup into your current data. Continue?':'ইমপোর্ট এই ব্যাকআপ আপনার বর্তমান ডেটায় মার্জ করবে। চালিয়ে যাবেন?',
+    'Assign to this seat':'এই আসনে বরাদ্দ করুন','for this seat.':'এই আসনের জন্য।',    'No entry yet':'এখনও কোন এন্ট্রি নেই',
+    'paid':'পরিশোধিত','partial':'আংশিক','due':'বকেয়া',    'No file chosen':'কোন ফাইল বাছাই হয়নি',
+    'Upload':'আপলোড','No payments yet':'এখনও কোন পেমেন্ট নেই','Attachments':'অ্যাটাচমেন্ট','No files yet':'এখনও কোন ফাইল নেই',
+    'Upload a photo ID, biodata form, or agreement.':'একটি ফটো আইডি, বায়োডাটা ফর্ম বা চুক্তিপত্র আপলোড করুন।',
+    'Vacate seat':'আসন খালি করুন','Assign seat':'আসন বরাদ্দ করুন','Delete resident':'বাসিন্দা মুছুন',
+    'Trash is empty':'ট্রাশ খালি','Restore':'ফিরিয়ে আনুন','Delete now':'এখন মুছুন',
+    'day left':'দিন বাকি','days left':'দিন বাকি','View':'দেখুন','Remove':'সরান','No seat':'কোন আসন নেই',
+    'Paid this month':'এই মাসে পরিশোধিত','Partial due':'আংশিক বকেয়া','Due this month':'এই মাসে বকেয়া',
+    'Phone':'ফোন','Email':'ইমেইল','NID / Passport':'এনআইডি / পাসপোর্ট','Monthly rent':'মাসিক ভাড়া',
+    'Guardian':'অভিভাবক','Address':'ঠিকানা','Occupation / Institution':'পেশা / প্রতিষ্ঠান','Joined':'যোগদান','Notes':'নোট',
+    'Deleted residents stay here for':'মোছা বাসিন্দারা এখানে','days in case it was a mistake, then are removed for good.':'দিন থাকে ভুল হলে ফেরত নেওয়ার জন্য, তারপর স্থায়ীভাবে মুছে ফেলা হয়।',
+    'Deleting frees their seat and moves them to Trash for':'মুছে ফেললে তাদের আসন খালি হবে এবং তারা ট্রাশে যাবে','days before permanent removal.':'দিন পর স্থায়ীভাবে মোছা হবে।',
+    'Payment history':'পেমেন্ট ইতিহাস',
+    'Orchid Hostel is locked':'অর্কিড হোস্টেল লক করা আছে',
+    'Not found':'পাওয়া যায়নি','This resident no longer exists.':'এই বাসিন্দা আর নেই।',
+    'of':'এর',
+    'Connected. Data is stored in your Firebase project and synced across devices.':'সংযুক্ত। ডেটা আপনার ফায়ারবেস প্রকল্পে সংরক্ষিত হয় ও ডিভাইসে সিঙ্ক হয়।',
+    'Right now data is stored only on this device (Local mode). Paste a Firebase project config below to sync to the cloud for free — see the README for the 5-minute setup.':'এখন ডেটা শুধু এই ডিভাইসে সংরক্ষিত (লোকাল মোড)। ক্লাউডে বিনামূল্যে সিঙ্ক করতে নিচে একটি ফায়ারবেস কনফিগ দিন — ৫-মিনিটের সেটআপের জন্য README দেখুন।',
+    'Optional 4-digit PIN so residents\' data isn\'t visible if someone picks up this device.':'ঐচ্ছিক ৪-সংখ্যার PIN, যাতে কেউ ডিভাইসটি নিলে বাসিন্দাদের তথ্য দেখা না যায়।',
+    'Get a free API key at aistudio.google.com → "Get API key". It stays on this device only.':'aistudio.google.com থেকে ফ্রি API কী নিন → "Get API key"। এটি শুধু এই ডিভাইসে থাকে।',
+    'Full name *':'পূর্ণ নাম *','Join date':'যোগদানের তারিখ','Room no.':'রুম নং','— No room —':'— কোন রুম নেই —','— Select room first —':'— আগে রুম বাছাই করুন —',
+    'No rooms available yet.':'এখনও কোন রুম নেই।','NID / Passport number':'এনআইডি / পাসপোর্ট নম্বর','Present address':'বর্তমান ঠিকানা','Guardian name':'অভিভাবকের নাম','Guardian phone':'অভিভাবকের ফোন',
+    'Upload file':'ফাইল আপলোড','No files added yet.':'এখনও কোন ফাইল যোগ হয়নি।','Edit resident':'বাসিন্দা সম্পাদনা',
+    'PDF, PNG, JPG or similar. Keep files modest in size — see Settings → Cloud sync for the limit.':'PDF, PNG, JPG বা অনুরূপ। ফাইলের আকার ছোট রাখুন — সীমার জন্য সেটিংস → ক্লাউড সিঙ্ক দেখুন।','incl. current':'বর্তমান সহ',
+    'No rooms yet':'এখনও কোন রুম নেই','Empty seats':'খালি আসন','All seats filled':'সব আসন পূর্ণ','Every seat has a resident.':'প্রতিটি আসনে একজন বাসিন্দা আছে।',
+  }
+};
+function t(s){ const l = (state && state.settings && state.settings.uiLang) || 'en'; return (I18N[l] && I18N[l][s]!=null) ? I18N[l][s] : s; }
+function langShort(code){ return code==='bn' ? 'বাং' : 'EN'; }
+function closeLangMenu(){ const m = $('#lang-menu'); if (m) m.classList.add('hidden'); }
+function toggleLangMenu(){
+  const m = $('#lang-menu'); if (!m) return;
+  if (m.classList.contains('hidden')){ renderLangMenu(); m.classList.remove('hidden'); }
+  else m.classList.add('hidden');
+  const sw = $('#lang-switch'); if (sw) sw.classList.toggle('open', !m.classList.contains('hidden'));
+}
+function renderLangMenu(){
+  const m = $('#lang-menu'); if (!m) return;
+  m.innerHTML = Object.keys(LANGS).map(code => {
+    const L = LANGS[code]; const sel = ((state.settings.uiLang)||'en')===code;
+    return `<button class="lang-opt ${sel?'active':''}" data-lang="${code}">${esc(L.native)}</button>`;
+  }).join('');
+  $$('.lang-opt', m).forEach(el => el.addEventListener('click', () => setLang(el.dataset.lang)));
+}
+async function setLang(code){
+  if (!LANGS[code]){ closeLangMenu(); return; }
+  if ((state.settings.uiLang||'en')===code){ closeLangMenu(); return; }
+  state.settings.uiLang = code;
+  await DB.saveSettings({ uiLang: code });
+  closeLangMenu();
+  renderTopbar(); render();
+}
+function renderTopbar(){
+  const bn = $('#brand-name'); if (bn) bn.textContent = state.settings.hostelName || 'Orchid Hostel';
+  const ll = $('#lang-label'); if (ll) ll.textContent = langShort(state.settings.uiLang || 'en');
+  const sd = $('#sync-dot'); if (sd) sd.classList.toggle('on', !!cloud);
+  $$('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+}
+function setupLangSwitch(){
+  const sw = $('#lang-switch'); if (sw) sw.addEventListener('click', (e)=>{ e.stopPropagation(); toggleLangMenu(); });
+  $$('.lang-opt').forEach(el => el.addEventListener('click', () => setLang(el.dataset.lang)));
+  document.addEventListener('click', (e)=>{
+    const m = $('#lang-menu');
+    if (m && !m.classList.contains('hidden') && !e.target.closest('#lang-switch') && !e.target.closest('#lang-menu')) closeLangMenu();
+  });
+}
 
 /* ---------- cloud (Firebase) state, lazily initialised ---------- */
 const FB_VER = '12.17.1';
@@ -476,7 +620,7 @@ async function initCloud(){
     };
   }catch(err){
     console.error('Firebase init failed', err);
-    toast('Could not connect to Firebase — check the config in Settings.');
+    toast(t('Could not connect to Firebase — check the config in Settings.'));
     cloud = null;
     throw err;
   }
@@ -671,31 +815,31 @@ function renderDashboard(){
   return `
     <div class="stat-grid">
       <div class="stat-card accent-orchid${hasDue ? ' due-alert' : ''}" style="display:flex; flex-direction:column; cursor:pointer;" data-nav="dues" role="button" tabindex="0">
-        <div class="eyebrow">Total due</div>
+        <div class="eyebrow">${t('Total due')}</div>
         <div class="big-num">${esc(cur)}${fmtMoney(totalDue)}</div>
-        <div style="${prevOutstanding>0 ? 'font-size:13px; margin-top:4px;' : 'font-size:16px; margin-top:auto;'} color:#fff; font-family:var(--font-mono);">${prevOutstanding>0 ? `<div style="font-size:15px; margin-top:2px; color:#fff;">${esc(cur)}${fmtMoney(prevOutstanding)}</div><div style="font-size:12px; margin-top:1px; letter-spacing:.06em; color:#fff;">PREVIOUS DUES</div>` : 'NO PREVIOUS DUES'}</div>
+        <div style="${prevOutstanding>0 ? 'font-size:13px; margin-top:4px;' : 'font-size:16px; margin-top:auto;'} color:#fff; font-family:var(--font-mono);">${prevOutstanding>0 ? `<div style="font-size:15px; margin-top:2px; color:#fff;">${esc(cur)}${fmtMoney(prevOutstanding)}</div><div style="font-size:12px; margin-top:1px; letter-spacing:.06em; color:#fff;">${t('PREVIOUS DUES')}</div>` : t('NO PREVIOUS DUES')}</div>
       </div>
       <div class="stat-card" data-nav="transactions" role="button" tabindex="0" style="display:inline-flex; flex-direction:column; align-items:center; justify-content:center; padding:2px 2px; cursor:pointer;">
-        <div class="eyebrow" style="align-self:flex-start; margin-left:15px; font-weight:700;">Money received</div>
+        <div class="eyebrow" style="align-self:flex-start; margin-left:15px; font-weight:700;">${t('Money received')}</div>
         ${progressRingSVG({collected:totals.collected, totalDue:totals.totalDue, currency:cur, size:132})}
       </div>
       <div class="stat-card" data-nav="emptySeats" role="button" tabindex="0" style="display:flex; flex-direction:column; cursor:pointer;">
-        <div class="eyebrow" style="font-weight:700;">Seats empty</div>
+        <div class="eyebrow" style="font-weight:700;">${t('Seats empty')}</div>
         <div class="big-num" style="color:var(--green)">${seatsEmpty}</div>
       </div>
       <div class="stat-card" data-nav="residents" role="button" tabindex="0" style="display:flex; flex-direction:column; cursor:pointer;">
-        <div class="eyebrow" style="font-weight:700;">Residents</div>
+        <div class="eyebrow" style="font-weight:700;">${t('Residents')}</div>
         <div class="big-num">${seatsOccupied}<span class="faint" style="font-size:15px;">/${seatsTotal}</span></div>
       </div>
     </div>
 
-    <div class="section-title"><h2>Residents with dues</h2>${dueList.length > 3 ? `<button class="link-btn" data-nav="dues">See all</button>` : ''}</div>
-    ${dueList.length===0 ? emptyState('check','All caught up','No pending dues this month.') :
+    <div class="section-title"><h2>${t('Residents with dues')}</h2>${dueList.length > 3 ? `<button class="link-btn" data-nav="dues">${t('See all')}</button>` : ''}</div>
+    ${dueList.length===0 ? emptyState('check', t('All caught up'), t('No pending dues this month.')) :
       `<div class="card" style="padding:4px 12px;">${dueList.slice(0,3).map(r=>residentRow(r)).join('')}</div>`}
 
-    <div class="section-title"><h2>Quick actions</h2></div>
+    <div class="section-title"><h2>${t('Quick actions')}</h2></div>
     <div class="btn-row" style="margin-top:0;">
-      <button class="btn btn-accent-orchid" data-nav="residentForm">＋ Add Resident</button>
+      <button class="btn btn-accent-orchid" data-nav="residentForm">＋ ${t('Add Resident')}</button>
     </div>
   `;
 }
@@ -716,9 +860,9 @@ function residentRow(r){
     <div class="avatar">${esc(initials(r.name))}</div>
     <div class="row-main">
       <div class="row-title">${esc(r.name)}</div>
-      <div class="row-sub">${seat ? esc(seat.room)+' · Seat '+esc(seat.seatLabel) : 'No seat assigned'}</div>
+      <div class="row-sub">${seat ? esc(seat.room)+' · '+t('Seat')+' '+esc(seat.seatLabel) : t('No seat assigned')}</div>
     </div>
-    <span class="badge ${st}">${st==='paid'?'Paid':st==='partial'?'Partial':'Due'}</span>
+    <span class="badge ${st}">${st==='paid'?t('Paid'):st==='partial'?t('Partial'):t('Due')}</span>
   </div>`;
 }
 
@@ -734,25 +878,25 @@ function renderResidents(){
   const trashCount = trashedResidents().length;
 
   return `
-    <div class="section-title"><h2>Residents</h2><button class="btn btn-primary btn-sm" data-nav="residentForm">＋ Add</button></div>
+    <div class="section-title"><h2>${t('Residents')}</h2><button class="btn btn-primary btn-sm" data-nav="residentForm">＋ ${t('Add')}</button></div>
     <div class="searchbar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="resident-search" placeholder="Search by name, phone, or room no." value="${esc(state._residentSearch||'')}" />
+      <input id="resident-search" placeholder="${t('Search by name, phone, or room no.')}" value="${esc(state._residentSearch||'')}" />
     </div>
     <div class="chip-row">
-      ${['all','active','due','paid','left'].map(f=>`<button class="chip ${state.residentFilter===f?'active':''}" data-rfilter="${f}">${f[0].toUpperCase()+f.slice(1)}</button>`).join('')}
+      ${['all','active','due','paid','left'].map(f=>`<button class="chip ${state.residentFilter===f?'active':''}" data-rfilter="${f}">${t(f[0].toUpperCase()+f.slice(1))}</button>`).join('')}
     </div>
-    ${q && list.length>0 ? `<div class="faint mono" style="font-size:11px; margin:-6px 0 10px;">${list.length} match${list.length===1?'':'es'} — room, name, or phone containing "${esc(state._residentSearch)}"</div>` : ''}
-    ${list.length===0 ? emptyState('users','No residents yet','Add your first resident to get started.') :
+    ${q && list.length>0 ? `<div class="faint mono" style="font-size:11px; margin:-6px 0 10px;">${list.length} ${t(list.length===1?'match':'matches')} — ${t('room, name, or phone containing')} "${esc(state._residentSearch)}"</div>` : ''}
+    ${list.length===0 ? emptyState('users', t('No residents yet'), t('Add your first resident to get started.')) :
       `<div class="card" style="padding:4px 12px;">${list.map(r=>residentRow(r)).join('')}</div>`}
-    ${trashCount>0 ? `<div style="text-align:center; margin-top:16px;"><button class="link-btn" data-nav="trash">🗑 Trash (${trashCount})</button></div>` : ''}
+    ${trashCount>0 ? `<div style="text-align:center; margin-top:16px;"><button class="link-btn" data-nav="trash">🗑 ${t('Trash')} (${trashCount})</button></div>` : ''}
   `;
 }
 
 /* ---------- rendering: resident detail ---------- */
 function renderResidentDetail(id){
   const r = state.residents.find(x=>x.id===id);
-  if (!r) return emptyState('users','Not found','This resident no longer exists.');
+   if (!r) return emptyState('users', t('Not found'), t('This resident no longer exists.'));
   const seat = residentSeat(r.id);
   const cur = state.settings.currency;
   const history = state.payments.filter(p=>p.residentId===id).sort((a,b)=>b.month.localeCompare(a.month));
@@ -766,47 +910,47 @@ function renderResidentDetail(id){
 
     <div class="card">
       <div class="row-sub" style="margin-bottom:10px;">
-        ${seat ? `<span class="badge occupied">${esc(seat.room)} · Seat ${esc(seat.seatLabel)}</span>` : `<span class="badge due">No seat</span>`}
-        <span class="badge ${residentDueStatus(r.id)}" style="margin-left:6px;">${residentDueStatus(r.id)==='paid'?'Paid this month':residentDueStatus(r.id)==='partial'?'Partial due':'Due this month'}</span>
+        ${seat ? `<span class="badge occupied">${esc(seat.room)} · ${t('Seat')} ${esc(seat.seatLabel)}</span>` : `<span class="badge due">${t('No seat')}</span>`}
+        <span class="badge ${residentDueStatus(r.id)}" style="margin-left:6px;">${residentDueStatus(r.id)==='paid'?t('Paid this month'):residentDueStatus(r.id)==='partial'?t('Partial due'):t('Due this month')}</span>
       </div>
-      ${detailLine('Phone', r.phone)} ${detailLine('Email', r.email)} ${detailLine('NID / Passport', r.nid)}
-      ${detailLine('Monthly rent', r.monthlyRent ? cur+fmtMoney(r.monthlyRent) : '')}
-      ${detailLine('Guardian', [r.guardianName, r.guardianPhone].filter(Boolean).join(' · '))}
-      ${detailLine('Address', r.address)}
-      ${detailLine('Occupation / Institution', r.occupation)}
-      ${detailLine('Joined', r.joinDate)}
-      ${r.notes ? detailLine('Notes', r.notes) : ''}
+      ${detailLine(t('Phone'), r.phone)} ${detailLine(t('Email'), r.email)} ${detailLine(t('NID / Passport'), r.nid)}
+      ${detailLine(t('Monthly rent'), r.monthlyRent ? cur+fmtMoney(r.monthlyRent) : '')}
+      ${detailLine(t('Guardian'), [r.guardianName, r.guardianPhone].filter(Boolean).join(' · '))}
+      ${detailLine(t('Address'), r.address)}
+      ${detailLine(t('Occupation / Institution'), r.occupation)}
+      ${detailLine(t('Joined'), r.joinDate)}
+      ${r.notes ? detailLine(t('Notes'), r.notes) : ''}
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-primary" id="btn-record-payment">Record payment</button>
-      <button class="btn btn-ghost" data-nav="residentForm" data-id="${r.id}">Edit</button>
+      <button class="btn btn-primary" id="btn-record-payment">${t('Record payment')}</button>
+      <button class="btn btn-ghost" data-nav="residentForm" data-id="${r.id}">${t('Edit')}</button>
     </div>
 
-    <div class="section-title"><h2>Payment history</h2></div>
-    ${history.length===0 ? emptyState('check','No payments yet','') :
+    <div class="section-title"><h2>${t('Payment history')}</h2></div>
+    ${history.length===0 ? emptyState('check', t('No payments yet'), '') :
       `<div class="card" style="padding:4px 12px;">${history.map(p=>`
         <div class="list-row">
           <div class="row-main"><div class="row-title mono" style="font-weight:600;">${esc(monthLabel(p.month))}</div>
-          <div class="row-sub">${cur}${fmtMoney(p.amountPaid||0)} of ${cur}${fmtMoney(p.amountDue||0)}</div></div>
-          <span class="badge ${p.status}">${p.status}</span>
+          <div class="row-sub">${cur}${fmtMoney(p.amountPaid||0)} ${t('of')} ${cur}${fmtMoney(p.amountDue||0)}</div></div>
+          <span class="badge ${p.status}">${t(p.status)}</span>
         </div>`).join('')}</div>`}
 
-    <div class="section-title"><h2>Attachments</h2><label class="link-btn" style="cursor:pointer;">＋ Upload<input type="file" id="att-input" class="hidden" /></label></div>
-    ${atts.length===0 ? emptyState('check','No files yet','Upload a photo ID, biodata form, or agreement.') :
+    <div class="section-title"><h2>${t('Attachments')}</h2><label class="link-btn" style="cursor:pointer;">＋ ${t('Upload')}<input type="file" id="att-input" class="hidden" /></label></div>
+    ${atts.length===0 ? emptyState('check', t('No files yet'), t('Upload a photo ID, biodata form, or agreement.')) :
       `<div class="card">${atts.map(a=>`
         <div class="att-row">
           <div class="att-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2v6h6"/><path d="M6 2h8l6 6v14H6z"/></svg></div>
           <div class="att-name">${esc(a.name)}</div>
-          <a href="${a.url}" target="_blank" rel="noopener" class="link-btn">View</a>
-          <button class="link-btn" data-del-att="${a.id}" style="color:var(--rust);">Remove</button>
+          <a href="${a.url}" target="_blank" rel="noopener" class="link-btn">${t('View')}</a>
+          <button class="link-btn" data-del-att="${a.id}" style="color:var(--rust);">${t('Remove')}</button>
         </div>`).join('')}</div>`}
 
     <div class="btn-row">
-      <button class="btn btn-outline" id="btn-vacate">${seat ? 'Vacate seat' : 'Assign seat'}</button>
-      <button class="btn btn-danger" id="btn-delete-resident">Delete resident</button>
+      <button class="btn btn-outline" id="btn-vacate">${seat ? t('Vacate seat') : t('Assign seat')}</button>
+      <button class="btn btn-danger" id="btn-delete-resident">${t('Delete resident')}</button>
     </div>
-    <div class="help" style="text-align:center; margin-top:8px;">Deleting frees their seat and moves them to Trash for ${TRASH_DAYS} days before permanent removal.</div>
+    <div class="help" style="text-align:center; margin-top:8px;">${t('Deleting frees their seat and moves them to Trash for')} ${TRASH_DAYS} ${t('days before permanent removal.')}</div>
   `;
 }
 function detailLine(label, val){
@@ -821,17 +965,17 @@ function renderTrash(){
   return `
     <div class="topline">
       <button class="iconbtn" data-nav="residents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
-      <h2 style="font-size:17px;">Trash</h2>
+      <h2 style="font-size:17px;">${t('Trash')}</h2>
     </div>
-    <p class="muted" style="font-size:12.5px; margin:-8px 0 14px;">Deleted residents stay here for ${TRASH_DAYS} days in case it was a mistake, then are removed for good.</p>
-    ${list.length===0 ? emptyState('check','Trash is empty','') :
+    <p class="muted" style="font-size:12.5px; margin:-8px 0 14px;">${t('Deleted residents stay here for')} ${TRASH_DAYS} ${t('days in case it was a mistake, then are removed for good.')}</p>
+    ${list.length===0 ? emptyState('check', t('Trash is empty'), '') :
       `<div class="card" style="padding:4px 12px;">${list.map(r=>`
         <div class="list-row">
           <div class="avatar">${esc(initials(r.name))}</div>
           <div class="row-main"><div class="row-title">${esc(r.name)}</div>
-          <div class="row-sub">${daysLeftInTrash(r)} day${daysLeftInTrash(r)===1?'':'s'} left</div></div>
-          <button class="link-btn" data-restore="${r.id}">Restore</button>
-          <button class="link-btn" data-purge="${r.id}" style="color:var(--rust);">Delete now</button>
+          <div class="row-sub">${daysLeftInTrash(r)} ${t(daysLeftInTrash(r)===1?'day left':'days left')}</div></div>
+          <button class="link-btn" data-restore="${r.id}">${t('Restore')}</button>
+          <button class="link-btn" data-purge="${r.id}" style="color:var(--rust);">${t('Delete now')}</button>
         </div>`).join('')}</div>`}
   `;
 }
@@ -845,57 +989,57 @@ function renderResidentForm(id){
   const roomOptions = roomNames.map(room => {
     const n = emptyCount(room);
     const isCurrent = currentSeat && currentSeat.room===room;
-    return `<option value="${esc(room)}" ${isCurrent?'selected':''}>${esc(room)} (${n} empty${isCurrent?', incl. current':''})</option>`;
+    return `<option value="${esc(room)}" ${isCurrent?'selected':''}>${esc(room)} (${n} ${t('empty')}${isCurrent?', '+t('incl. current'):''})</option>`;
   }).join('');
 
   return `
     <div class="topline">
       <button class="iconbtn" data-nav="${id?'residentDetail':'residents'}" data-id="${id||''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
-      <h2 style="font-size:17px;">${r?'Edit resident':'Add resident'}</h2>
+      <h2 style="font-size:17px;">${r?t('Edit resident'):t('Add resident')}</h2>
     </div>
     <form id="resident-form">
-      <div class="field"><label>Full name *</label><input name="name" required value="${esc(r?.name||'')}" /></div>
+      <div class="field"><label>${t('Full name *')}</label><input name="name" required value="${esc(r?.name||'')}" /></div>
       <div class="field-row">
-        <div class="field"><label>Phone</label><input name="phone" value="${esc(r?.phone||'')}" /></div>
-        <div class="field"><label>Email</label><input name="email" type="email" value="${esc(r?.email||'')}" /></div>
+        <div class="field"><label>${t('Phone')}</label><input name="phone" value="${esc(r?.phone||'')}" /></div>
+        <div class="field"><label>${t('Email')}</label><input name="email" type="email" value="${esc(r?.email||'')}" /></div>
       </div>
       <div class="field-row">
-        <div class="field"><label>Monthly rent (${esc(state.settings.currency)})</label><input name="monthlyRent" type="number" min="0" value="${r?.monthlyRent||''}" /></div>
-        <div class="field"><label>Join date</label><input name="joinDate" type="date" value="${r?.joinDate||todayISO()}" /></div>
+        <div class="field"><label>${t('Monthly rent')} (${esc(state.settings.currency)})</label><input name="monthlyRent" type="number" min="0" value="${r?.monthlyRent||''}" /></div>
+        <div class="field"><label>${t('Join date')}</label><input name="joinDate" type="date" value="${r?.joinDate||todayISO()}" /></div>
       </div>
 
       <div class="field-row">
-        <div class="field"><label>Room no.</label>
+        <div class="field"><label>${t('Room no.')}</label>
           <select id="rf-room" name="room">
-            <option value="">— No room —</option>
+            <option value="">${t('— No room —')}</option>
             ${roomOptions}
           </select>
         </div>
-        <div class="field"><label>Seat</label>
-          <select id="rf-seat" name="seatLabel"><option value="">— Select room first —</option></select>
+        <div class="field"><label>${t('Seat')}</label>
+          <select id="rf-seat" name="seatLabel"><option value="">${t('— Select room first —')}</option></select>
         </div>
       </div>
-      ${roomNames.length===0 ? `<div class="help" style="margin-top:-8px;">No rooms available yet.</div>` : ''}
+      ${roomNames.length===0 ? `<div class="help" style="margin-top:-8px;">${t('No rooms available yet.')}</div>` : ''}
 
-      <div class="field"><label>NID / Passport number</label><input name="nid" value="${esc(r?.nid||'')}" /></div>
-      <div class="field"><label>Present address</label><textarea name="address" rows="2">${esc(r?.address||'')}</textarea></div>
+      <div class="field"><label>${t('NID / Passport number')}</label><input name="nid" value="${esc(r?.nid||'')}" /></div>
+      <div class="field"><label>${t('Present address')}</label><textarea name="address" rows="2">${esc(r?.address||'')}</textarea></div>
       <div class="field-row">
-        <div class="field"><label>Guardian name</label><input name="guardianName" value="${esc(r?.guardianName||'')}" /></div>
-        <div class="field"><label>Guardian phone</label><input name="guardianPhone" value="${esc(r?.guardianPhone||'')}" /></div>
+        <div class="field"><label>${t('Guardian name')}</label><input name="guardianName" value="${esc(r?.guardianName||'')}" /></div>
+        <div class="field"><label>${t('Guardian phone')}</label><input name="guardianPhone" value="${esc(r?.guardianPhone||'')}" /></div>
       </div>
-      <div class="field"><label>Occupation / Institution</label><input name="occupation" value="${esc(r?.occupation||'')}" /></div>
-      <div class="field"><label>Notes</label><textarea name="notes" rows="2">${esc(r?.notes||'')}</textarea></div>
+      <div class="field"><label>${t('Occupation / Institution')}</label><input name="occupation" value="${esc(r?.occupation||'')}" /></div>
+      <div class="field"><label>${t('Notes')}</label><textarea name="notes" rows="2">${esc(r?.notes||'')}</textarea></div>
 
       <div class="field">
-        <label>Attachments</label>
-        <label class="btn btn-outline btn-sm" style="cursor:pointer; display:inline-flex;">＋ Upload file
+        <label>${t('Attachments')}</label>
+        <label class="btn btn-outline btn-sm" style="cursor:pointer; display:inline-flex;">＋ ${t('Upload file')}
           <input type="file" id="rf-att-input" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/*" class="hidden" />
         </label>
         <div id="rf-att-list" style="margin-top:8px;">${renderPendingAttachmentsList()}</div>
-        <div class="help">PDF, PNG, JPG or similar. Keep files modest in size — see Settings → Cloud sync for the limit.</div>
+        <div class="help">${t('PDF, PNG, JPG or similar. Keep files modest in size — see Settings → Cloud sync for the limit.')}</div>
       </div>
 
-      <button class="btn btn-primary" type="submit" style="margin-top:6px;">${r?'Save changes':'Add resident'}</button>
+      <button class="btn btn-primary" type="submit" style="margin-top:6px;">${r?t('Save changes'):t('Add resident')}</button>
     </form>
   `;
 }
@@ -948,22 +1092,22 @@ function renderSeats(){
   ];
 
   return `
-    <div class="section-title"><h2>Seats</h2></div>
+    <div class="section-title"><h2>${t('Seats')}</h2></div>
     <div class="searchbar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="seat-search" placeholder="Search room no., name, or phone" value="${esc(state._seatSearch||'')}" />
+      <input id="seat-search" placeholder="${t('Search room no., name, or phone')}" value="${esc(state._seatSearch||'')}" />
     </div>
     <div class="chip-row">
-      ${sortChips.map(c=>`<button class="chip ${mode===c.id?'active':''}" data-seat-sort="${c.id}">${esc(c.label)}</button>`).join('')}
+      ${sortChips.map(c=>`<button class="chip ${mode===c.id?'active':''}" data-seat-sort="${c.id}">${t(c.label)}</button>`).join('')}
     </div>
-    ${q && roomNames.length===0 ? emptyState('door','No matches','Nothing found for that search.') : ''}
-    ${roomNames.length===0 && !q ? emptyState('door','No rooms yet','Rooms will appear here once added.') :
+    ${q && roomNames.length===0 ? emptyState('door', t('No matches'), t('Nothing found for that search.')) : ''}
+    ${roomNames.length===0 && !q ? emptyState('door', t('No rooms yet'), t('Rooms will appear here once added.')) :
       roomNames.map(room => {
         const meta = rooms[room][0];
-        const metaBits = [meta.floor ? `Floor ${esc(meta.floor)}` : null, meta.bedType ? esc(meta.bedType[0].toUpperCase()+meta.bedType.slice(1)) : null].filter(Boolean);
+        const metaBits = [meta.floor ? `${t('Floor')} ${esc(meta.floor)}` : null, meta.bedType ? esc(meta.bedType[0].toUpperCase()+meta.bedType.slice(1)) : null].filter(Boolean);
         return `
         <div class="room-block">
-          <h3>Room ${esc(room)}${metaBits.length?' · '+metaBits.join(' · '):''} · ${occCount(room)}/${rooms[room].length} occupied</h3>
+          <h3>${t('Room')} ${esc(room)}${metaBits.length?' · '+metaBits.join(' · '):''} · ${occCount(room)}/${rooms[room].length} ${t('occupied')}</h3>
           <div class="tag-grid">
             ${rooms[room].slice().sort(tileSort).map(s => {
               const res = s.residentId ? state.residents.find(r=>r.id===s.residentId) : null;
@@ -995,27 +1139,27 @@ function renderDues(){
   const missing = activeResidents.filter(r=>!monthPayments.find(p=>p.residentId===r.id));
 
   return `
-    <div class="section-title"><h2>Dues</h2>
+    <div class="section-title"><h2>${t('Dues')}</h2>
       <input type="month" id="dues-month" value="${mk}" style="border:none; background:var(--paper-alt); border-radius:8px; padding:5px 8px; font-family:var(--font-mono); font-size:12px;" />
     </div>
     <div class="stat-grid">
-      <div class="stat-card"><div class="eyebrow">Collected</div><div class="big-num" style="color:var(--green); font-size:26px;">${cur}${fmtMoney(collected)}</div></div>
-      <div class="stat-card"><div class="eyebrow">Outstanding</div><div class="big-num" style="color:var(--rust); font-size:26px;">${cur}${fmtMoney(due)}</div></div>
+      <div class="stat-card"><div class="eyebrow">${t('Collected')}</div><div class="big-num" style="color:var(--green); font-size:26px;">${cur}${fmtMoney(collected)}</div></div>
+      <div class="stat-card"><div class="eyebrow">${t('Outstanding')}</div><div class="big-num" style="color:var(--rust); font-size:26px;">${cur}${fmtMoney(due)}</div></div>
     </div>
     ${missing.length>0 ? `<div class="card" style="background:var(--gold-tint); border-color:transparent;">
-      <div style="font-size:13.5px; font-weight:600; margin-bottom:8px;">${missing.length} resident(s) have no due entry for ${esc(monthLabel(mk))} yet.</div>
-      <button class="btn btn-primary btn-sm" id="btn-generate-dues">Generate this month's dues</button>
+      <div style="font-size:13.5px; font-weight:600; margin-bottom:8px;">${missing.length} ${t('resident(s) have no due entry for')} ${esc(monthLabel(mk))}.</div>
+      <button class="btn btn-primary btn-sm" id="btn-generate-dues">${t("Generate this month's dues")}</button>
     </div>` : ''}
     <div class="section-title"><h2>${esc(monthLabel(mk))}</h2></div>
-    ${activeResidents.length===0 ? emptyState('users','No residents yet','') :
+    ${activeResidents.length===0 ? emptyState('users', t('No residents yet'), '') :
       `<div class="card" style="padding:4px 12px;">${activeResidents.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(r=>{
         const p = monthPayments.find(x=>x.residentId===r.id);
         const st = p ? p.status : 'due';
         return `<div class="list-row" data-open-resident="${r.id}" style="cursor:pointer;">
           <div class="avatar">${esc(initials(r.name))}</div>
           <div class="row-main"><div class="row-title">${esc(r.name)}</div>
-          <div class="row-sub">${p ? cur+fmtMoney(p.amountPaid||0)+' of '+cur+fmtMoney(p.amountDue||0) : 'No entry yet'}</div></div>
-          <span class="badge ${st}">${st}</span>
+          <div class="row-sub">${p ? cur+fmtMoney(p.amountPaid||0)+' '+t('of')+' '+cur+fmtMoney(p.amountDue||0) : t('No entry yet')}</div></div>
+          <span class="badge ${st}">${t(st)}</span>
         </div>`;
       }).join('')}</div>`}
   `;
@@ -1023,15 +1167,15 @@ function renderDues(){
 
 function renderEmptySeats(){
   const empty = state.seats.filter(s => !s.residentId).slice().sort((a,b)=> (a.room+b.seatLabel).localeCompare(b.room+a.seatLabel));
-  if (empty.length===0) return `<div class="topline"><button class="iconbtn" data-nav="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button><h2 style="font-size:17px;">Empty seats</h2></div>
-    ${emptyState('door','All seats filled','Every seat has a resident.')}`;
+  if (empty.length===0) return `<div class="topline"><button class="iconbtn" data-nav="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button><h2 style="font-size:17px;">${t('Empty seats')}</h2></div>
+    ${emptyState('door', t('All seats filled'), t('Every seat has a resident.'))}`;
   const byRoom = {};
   empty.forEach(s => { (byRoom[s.room] = byRoom[s.room]||[]).push(s); });
   const roomNames = Object.keys(byRoom).sort((a,b)=> a.localeCompare(b,undefined,{numeric:true}));
-  return `<div class="topline"><button class="iconbtn" data-nav="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button><h2 style="font-size:17px;">Empty seats</h2></div>
+  return `<div class="topline"><button class="iconbtn" data-nav="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button><h2 style="font-size:17px;">${t('Empty seats')}</h2></div>
     ${roomNames.map(room => `
       <div class="room-block">
-        <h3>Room ${esc(room)} · ${byRoom[room].length} empty</h3>
+        <h3>${t('Room')} ${esc(room)} · ${byRoom[room].length} ${t('empty')}</h3>
         <div class="tag-grid">
           ${byRoom[room].sort((a,b)=>a.seatLabel.localeCompare(b.seatLabel,undefined,{numeric:true})).map(s => `<button class="key-tag" data-seat="${s.id}"><div class="plate"><div class="hole"></div></div><span class="lbl">${esc(s.seatLabel)}</span></button>`).join('')}
         </div>
@@ -1048,10 +1192,10 @@ function renderTransactions(){
   return `
     <div class="topline">
       <button class="iconbtn" data-nav="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
-      <h2 style="font-size:17px;">Transactions</h2>
+      <h2 style="font-size:17px;">${t('Transactions')}</h2>
     </div>
-    <p class="muted" style="font-size:12.5px; margin:-6px 0 14px;">Every time the admin marks a resident as paid for a month, it's recorded here.</p>
-    ${rows.length===0 ? emptyState('check','No transactions yet','') :
+    <p class="muted" style="font-size:12.5px; margin:-6px 0 14px;">${t("Every time the admin marks a resident as paid for a month, it's recorded here.")}</p>
+    ${rows.length===0 ? emptyState('check', t('No transactions yet'), '') :
       `<div class="card" style="padding:4px 12px;">${rows.map(p=>{
         const r = state.residents.find(x=>x.id===p.residentId);
         const resName = r ? r.name : (p.residentName||'Unknown');
@@ -1060,10 +1204,10 @@ function renderTransactions(){
           <div class="avatar">${esc(initials(resName))}</div>
           <div class="row-main">
             <div class="row-title">${esc(resName)}</div>
-            <div class="row-sub">${esc(monthLabel(p.month))} · ${esc(cur)}${fmtMoney(p.amountPaid||0)} of ${esc(cur)}${fmtMoney(p.amountDue||0)}</div>
-            <div class="row-sub mono" style="font-size:11px; color:var(--ink-faint); margin-top:1px;">Paid ${p.paidDate ? new Date(p.paidDate).toLocaleString() : '— not marked paid'}</div>
+            <div class="row-sub">${esc(monthLabel(p.month))} · ${esc(cur)}${fmtMoney(p.amountPaid||0)} ${t('of')} ${esc(cur)}${fmtMoney(p.amountDue||0)}</div>
+            <div class="row-sub mono" style="font-size:11px; color:var(--ink-faint); margin-top:1px;">${p.paidDate ? t('Paid')+' '+new Date(p.paidDate).toLocaleString() : '— '+t('not marked paid')}</div>
           </div>
-          <span class="badge ${st}">${st}</span>
+          <span class="badge ${st}">${t(st)}</span>
         </div>`;
       }).join('')}</div>`}
   `;
@@ -1075,57 +1219,57 @@ function renderSettings(){
   const fbCfg = lsGet(LS.fbConfig, null);
   const gKey = lsGet(LS.geminiKey, '');
   return `
-    <div class="section-title"><h2>Settings</h2></div>
+    <div class="section-title"><h2>${t('Settings')}</h2></div>
 
     <div class="card">
-      <div class="field"><label>Hostel name</label><input id="set-hostel-name" value="${esc(s.hostelName)}" /></div>
-      <div class="field"><label>Currency symbol</label><input id="set-currency" value="${esc(s.currency)}" style="max-width:100px;" /></div>
-      <div class="field"><label>Voice command language</label>
+      <div class="field"><label>${t('Hostel name')}</label><input id="set-hostel-name" value="${esc(s.hostelName)}" /></div>
+      <div class="field"><label>${t('Currency symbol')}</label><input id="set-currency" value="${esc(s.currency)}" style="max-width:100px;" /></div>
+      <div class="field"><label>${t('Voice command language')}</label>
         <select id="set-voice-lang">
           <option value="en-US" ${s.voiceLang==='en-US'?'selected':''}>English</option>
           <option value="bn-BD" ${s.voiceLang==='bn-BD'?'selected':''}>Bengali (বাংলা)</option>
         </select>
       </div>
-      <button class="btn btn-primary btn-sm" id="btn-save-general">Save</button>
+      <button class="btn btn-primary btn-sm" id="btn-save-general">${t('Save')}</button>
     </div>
 
-    <div class="section-title"><h2>Gemini voice assistant</h2></div>
+    <div class="section-title"><h2>${t('Gemini voice assistant')}</h2></div>
     <div class="card">
-      <p class="muted" style="font-size:12.5px; margin:0 0 10px;">Get a free API key at <span class="mono">aistudio.google.com</span> → "Get API key". It stays on this device only.</p>
-      <div class="field"><label>Gemini API key</label><input id="set-gemini-key" type="password" value="${esc(gKey)}" placeholder="AIza..." /></div>
-      <button class="btn btn-primary btn-sm" id="btn-save-gemini">Save key</button>
+      <p class="muted" style="font-size:12.5px; margin:0 0 10px;">${t("Get a free API key at aistudio.google.com → \"Get API key\". It stays on this device only.")}</p>
+      <div class="field"><label>${t('Gemini API key')}</label><input id="set-gemini-key" type="password" value="${esc(gKey)}" placeholder="AIza..." /></div>
+      <button class="btn btn-primary btn-sm" id="btn-save-gemini">${t('Save key')}</button>
     </div>
 
-    <div class="section-title"><h2>Cloud sync</h2></div>
+    <div class="section-title"><h2>${t('Cloud sync')}</h2></div>
     <div class="card">
       <p class="muted" style="font-size:12.5px; margin:0 0 10px;">
-        ${cloud ? 'Connected. Data is stored in your Firebase project and synced across devices.' : 'Right now data is stored only on this device (Local mode). Paste a Firebase project config below to sync to the cloud for free — see the README for the 5-minute setup.'}
+        ${cloud ? t('Connected. Data is stored in your Firebase project and synced across devices.') : t('Right now data is stored only on this device (Local mode). Paste a Firebase project config below to sync to the cloud for free — see the README for the 5-minute setup.')}
       </p>
-      <div class="field"><label>Firebase config (JSON)</label><textarea id="set-fb-config" rows="4" placeholder='{"apiKey":"...","projectId":"...", ...}'>${fbCfg?esc(JSON.stringify(fbCfg)):''}</textarea></div>
+      <div class="field"><label>${t('Firebase config (JSON)')}</label><textarea id="set-fb-config" rows="4" placeholder='{"apiKey":"...","projectId":"...", ...}'>${fbCfg?esc(JSON.stringify(fbCfg)):''}</textarea></div>
       <div class="btn-row" style="margin-top:8px;">
-        <button class="btn btn-primary btn-sm" id="btn-connect-cloud">${cloud?'Reconnect':'Connect'}</button>
-        ${fbCfg ? `<button class="btn btn-outline btn-sm" id="btn-disconnect-cloud">Disconnect</button>` : ''}
+        <button class="btn btn-primary btn-sm" id="btn-connect-cloud">${cloud?t('Reconnect'):t('Connect')}</button>
+        ${fbCfg ? `<button class="btn btn-outline btn-sm" id="btn-disconnect-cloud">${t('Disconnect')}</button>` : ''}
       </div>
-      ${cloud ? `<div class="btn-row"><button class="btn btn-outline btn-sm" id="btn-signout">Sign out (${currentUser?.email||''})</button></div>` : ''}
+      ${cloud ? `<div class="btn-row"><button class="btn btn-outline btn-sm" id="btn-signout">${t('Sign out')} (${currentUser?.email||''})</button></div>` : ''}
     </div>
 
-    <div class="section-title"><h2>App lock</h2></div>
+    <div class="section-title"><h2>${t('App lock')}</h2></div>
     <div class="card">
-      <p class="muted" style="font-size:12.5px; margin:0 0 10px;">Optional 4-digit PIN so residents' data isn't visible if someone picks up this device.</p>
+      <p class="muted" style="font-size:12.5px; margin:0 0 10px;">${t("Optional 4-digit PIN so residents' data isn't visible if someone picks up this device.")}</p>
       <div class="btn-row" style="margin-top:0;">
-        <button class="btn btn-outline btn-sm" id="btn-set-pin">${lsGet(LS.pin,null)?'Change PIN':'Set PIN'}</button>
-        ${lsGet(LS.pin,null) ? `<button class="btn btn-outline btn-sm" id="btn-clear-pin">Remove PIN</button>` : ''}
+        <button class="btn btn-outline btn-sm" id="btn-set-pin">${lsGet(LS.pin,null)?t('Change PIN'):t('Set PIN')}</button>
+        ${lsGet(LS.pin,null) ? `<button class="btn btn-outline btn-sm" id="btn-clear-pin">${t('Remove PIN')}</button>` : ''}
       </div>
     </div>
 
-    <div class="section-title"><h2>Data</h2></div>
+    <div class="section-title"><h2>${t('Data')}</h2></div>
     <div class="card">
       <div class="btn-row" style="margin-top:0;">
-        <button class="btn btn-ghost btn-sm" id="btn-export">Export backup (.json)</button>
-        <label class="btn btn-outline btn-sm" style="cursor:pointer;">Import<input type="file" id="btn-import" accept="application/json" class="hidden" /></label>
+        <button class="btn btn-ghost btn-sm" id="btn-export">${t('Export backup (.json)')}</button>
+        <label class="btn btn-outline btn-sm" style="cursor:pointer;">${t('Import')}<input type="file" id="btn-import" accept="application/json" class="hidden" /></label>
       </div>
       <div class="btn-row">
-        <button class="btn btn-outline btn-sm" data-nav="trash">🗑 Trash (${trashedResidents().length})</button>
+        <button class="btn btn-outline btn-sm" data-nav="trash">🗑 ${t('Trash')} (${trashedResidents().length})</button>
       </div>
     </div>
   `;
@@ -1143,6 +1287,7 @@ function nav(view, opts={}){
   $('#view-root').scrollTop = 0;
 }
 async function render(){
+  renderTopbar();
   $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.view===state.view));
   const root = $('#view-root');
   if (state.view==='dashboard') root.innerHTML = renderDashboard();
@@ -1236,17 +1381,17 @@ function openSeatSheet(seatId){
   const res = seat?.residentId ? state.residents.find(r=>r.id===seat.residentId) : null;
   const emptySeats = visibleResidents().filter(r=>!residentSeat(r.id));
   openSheet(`
-    <h3>Room ${esc(seat.room)} · Seat ${esc(seat.seatLabel)}</h3>
+    <h3>${t('Room')} ${esc(seat.room)} · ${t('Seat')} ${esc(seat.seatLabel)}</h3>
     ${res ? `
       <div class="list-row"><div class="avatar">${esc(initials(res.name))}</div>
         <div class="row-main"><div class="row-title">${esc(res.name)}</div><div class="row-sub">${esc(res.phone||'')}</div></div></div>
-      <div class="btn-row"><button class="btn btn-outline" id="seat-view">View resident</button><button class="btn btn-danger" id="seat-vacate">Vacate</button></div>
+      <div class="btn-row"><button class="btn btn-outline" id="seat-view">${t('View resident')}</button><button class="btn btn-danger" id="seat-vacate">${t('Vacate')}</button></div>
     ` : `
-      ${emptySeats.length===0 ? `<p class="muted" style="font-size:13px;">No unassigned residents. <button class="link-btn" id="seat-add-resident">Add a new resident</button> for this seat.</p>` : `
-      <div class="field"><label>Assign resident</label>
+      ${emptySeats.length===0 ? `<p class="muted" style="font-size:13px;">${t('No unassigned residents.')} <button class="link-btn" id="seat-add-resident">${t('Add a new resident')}</button> ${t('for this seat.')}</p>` : `
+      <div class="field"><label>${t('Assign resident')}</label>
         <select id="seat-assign-select">${emptySeats.map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('')}</select>
       </div>
-      <button class="btn btn-primary" id="seat-assign-btn">Assign to this seat</button>`}
+      <button class="btn btn-primary" id="seat-assign-btn">${t('Assign to this seat')}</button>`}
     `}
   `, (ov) => {
     if (res){
@@ -1280,11 +1425,11 @@ function openPaymentSheet(residentId){
   const mk = monthKey();
   const existing = currentMonthPayment(residentId, mk);
   openSheet(`
-    <h3>Record payment · ${esc(r.name)}</h3>
-    <div class="field"><label>Month</label><input id="pay-month" type="month" value="${mk}" /></div>
-    <div class="field"><label>Amount due (${esc(state.settings.currency)})</label><input id="pay-due" type="number" min="0" value="${existing?.amountDue ?? r.monthlyRent ?? ''}" /></div>
-    <div class="field"><label>Amount paid now (${esc(state.settings.currency)})</label><input id="pay-amount" type="number" min="0" value="${existing?.amountPaid ?? ''}" /></div>
-    <button class="btn btn-primary" id="pay-save">Save payment</button>
+    <h3>${t('Record payment')} · ${esc(r.name)}</h3>
+    <div class="field"><label>${t('Month')}</label><input id="pay-month" type="month" value="${mk}" /></div>
+    <div class="field"><label>${t('Amount due')} (${esc(state.settings.currency)})</label><input id="pay-due" type="number" min="0" value="${existing?.amountDue ?? r.monthlyRent ?? ''}" /></div>
+    <div class="field"><label>${t('Amount paid now')} (${esc(state.settings.currency)})</label><input id="pay-amount" type="number" min="0" value="${existing?.amountPaid ?? ''}" /></div>
+    <button class="btn btn-primary" id="pay-save">${t('Save payment')}</button>
   `, (ov) => {
     $('#pay-save', ov).onclick = async () => {
       const month = $('#pay-month', ov).value || mk;
@@ -1373,30 +1518,30 @@ function bindViewEvents(){
         await DB.saveSeat({...prevSeat, status:'empty', residentId:null});
       }
 
-      toast('Resident saved — synced and room assignment updated.');
+      toast(t('Resident saved — synced and room assignment updated.'));
       await refresh(); nav('residentDetail', {id:saved.id});
     });
   }
 
   $('#btn-record-payment')?.addEventListener('click', () => openPaymentSheet(state._openId));
   $('#btn-delete-resident')?.addEventListener('click', async () => {
-    if (!confirm(`Move this resident to Trash? Their seat will be freed right away. You can restore them any time within ${TRASH_DAYS} days.`)) return;
+    if (!confirm(`${t('Move this resident to Trash? Their seat will be freed right away. You can restore them any time within')} ${TRASH_DAYS}${t(' days.')}`)) return;
     await softDeleteResident(state._openId);
-    toast('Moved to trash.'); await refresh(); nav('residents');
+    toast(t('Moved to trash.')); await refresh(); nav('residents');
   });
   $('#btn-vacate')?.addEventListener('click', async () => {
     const seat = residentSeat(state._openId);
-    if (seat){ await vacateSeatId(seat.id); toast('Seat vacated.'); await refresh(); nav('residentDetail',{id:state._openId}); }
-    else { closeSheetSafe(); nav('seats'); toast('Tap an empty seat to assign this resident.'); }
+    if (seat){ await vacateSeatId(seat.id); toast(t('Seat vacated.')); await refresh(); nav('residentDetail',{id:state._openId}); }
+    else { closeSheetSafe(); nav('seats'); toast(t('Tap an empty seat to assign this resident.')); }
   });
   $('#att-input')?.addEventListener('change', async (e) => {
     const file = e.target.files[0]; if (!file) return;
-    toast('Uploading…');
+    toast(t('Uploading…'));
     try{
       const att = await DB.uploadFile(file, state._openId);
       const r = state.residents.find(x=>x.id===state._openId);
       r.attachments = [...(r.attachments||[]), att];
-      await DB.saveResident(r); toast('File added.'); await refresh(); nav('residentDetail',{id:state._openId});
+      await DB.saveResident(r); toast(t('File added.')); await refresh(); nav('residentDetail',{id:state._openId});
     }catch(err){ toast(err.message); }
   });
   $$('[data-del-att]').forEach(el => el.addEventListener('click', async () => {
@@ -1406,41 +1551,41 @@ function bindViewEvents(){
   }));
   $$('[data-restore]').forEach(el => el.addEventListener('click', async () => {
     await restoreResident(el.dataset.restore);
-    toast('Resident restored — unassigned, ready to add back to a room.'); await refresh(); nav('trash');
+    toast(t('Resident restored — unassigned, ready to add back to a room.')); await refresh(); nav('trash');
   }));
   $$('[data-purge]').forEach(el => el.addEventListener('click', async () => {
-    if (!confirm('Permanently delete this record right now? This cannot be undone.')) return;
+    if (!confirm(t('Permanently delete this record right now? This cannot be undone.'))) return;
     await DB.deleteResident(el.dataset.purge);
     state.residents = state.residents.filter(r=>r.id!==el.dataset.purge);
-    toast('Permanently deleted.'); render();
+    toast(t('Permanently deleted.')); render();
   }));
 
   $('#dues-month')?.addEventListener('change', (e) => { state._duesMonth = e.target.value; render(); });
   $('#btn-generate-dues')?.addEventListener('click', async () => {
     await generateMonthlyDues(state._duesMonth || monthKey());
-    toast('Dues generated for this month.'); await refresh();
+    toast(t('Dues generated for this month.')); await refresh();
   });
 
   $('#btn-save-general')?.addEventListener('click', async () => {
     await DB.saveSettings({ hostelName: $('#set-hostel-name').value.trim()||'Orchid Hostel', currency: $('#set-currency').value||'৳', voiceLang: $('#set-voice-lang').value });
-    toast('Saved.'); await refresh();
+    toast(t('Saved.')); await refresh();
   });
-  $('#btn-save-gemini')?.addEventListener('click', () => { lsSet(LS.geminiKey, $('#set-gemini-key').value.trim()); toast('Gemini key saved on this device.'); });
+  $('#btn-save-gemini')?.addEventListener('click', () => { lsSet(LS.geminiKey, $('#set-gemini-key').value.trim()); toast(t('Gemini key saved on this device.')); });
   $('#btn-connect-cloud')?.addEventListener('click', async () => {
     let cfg;
-    try{ cfg = JSON.parse($('#set-fb-config').value); }catch(e){ toast('That does not look like valid JSON.'); return; }
+    try{ cfg = JSON.parse($('#set-fb-config').value); }catch(e){ toast(t('That does not look like valid JSON.')); return; }
     lsSet(LS.fbConfig, cfg);
-    toast('Connecting…');
+    toast(t('Connecting…'));
     location.reload();
   });
   $('#btn-disconnect-cloud')?.addEventListener('click', () => {
-    if (!confirm('Disconnect cloud sync? This device will go back to local-only storage.')) return;
+    if (!confirm(t('Disconnect cloud sync? This device will go back to local-only storage.'))) return;
     localStorage.removeItem(LS.fbConfig); location.reload();
   });
   $('#btn-signout')?.addEventListener('click', async () => { await cloud.ax.signOut(cloud.auth); location.reload(); });
 
   $('#btn-set-pin')?.addEventListener('click', () => openPinSetupSheet());
-  $('#btn-clear-pin')?.addEventListener('click', () => { localStorage.removeItem(LS.pin); toast('PIN removed.'); render(); });
+  $('#btn-clear-pin')?.addEventListener('click', () => { localStorage.removeItem(LS.pin); toast(t('PIN removed.')); render(); });
 
   $('#btn-export')?.addEventListener('click', async () => {
     const data = { residents: await DB.listResidents(), seats: await DB.listSeats(), payments: await DB.listPayments(), settings: await DB.settings(), exportedAt: new Date().toISOString() };
@@ -1452,13 +1597,13 @@ function bindViewEvents(){
     const text = await file.text();
     try{
       const data = JSON.parse(text);
-      if (!confirm('Import will merge this backup into your current data. Continue?')) return;
+      if (!confirm(t('Import will merge this backup into your current data. Continue?'))) return;
       for (const r of data.residents||[]) await DB.saveResident(r);
       for (const s of data.seats||[]) await DB.saveSeat(s);
       for (const p of data.payments||[]) await DB.savePayment(p);
       if (data.settings) await DB.saveSettings(data.settings);
-      toast('Import complete.'); await refresh();
-    }catch(err){ toast('Could not read that file.'); }
+      toast(t('Import complete.')); await refresh();
+    }catch(err){ toast(t('Could not read that file.')); }
   });
 }
 function populateSeatSelect(room, residentId, preselectLabel){
@@ -1490,12 +1635,12 @@ async function generateMonthlyDues(mk){
   await DB.saveSettings({ lastGeneratedMonth: mk });
 }
 
-/* tab bar */
+/* tab bar + language switch (bound once at startup; elements live in the static topbar) */
 $('#tabbar').addEventListener('click', (e) => {
   const btn = e.target.closest('.tab'); if (!btn) return;
   nav(btn.dataset.view);
 });
-$('#sync-pill').addEventListener('click', () => nav('settings'));
+setupLangSwitch();
 
 /* ================= GEMINI VOICE ASSISTANT ================= */
 const GEMINI_MODEL = 'gemini-3.7-flash';
@@ -1682,14 +1827,14 @@ function openVoiceModal(){
   const m = $('#voice-modal');
   m.innerHTML = `<div class="voice-card">
     <div class="voice-orb listening" id="vo-orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v3"/></svg></div>
-    <div class="voice-status" id="vo-status">Listening…</div>
+    <div class="voice-status" id="vo-status">${t('Listening…')}</div>
     <div class="voice-transcript" id="vo-transcript"></div>
     <div class="voice-reply hidden" id="vo-reply"></div>
     <div class="voice-type-row">
-      <input id="vo-type" placeholder="Or type a command…" />
-      <button class="btn btn-primary btn-sm" id="vo-send">Send</button>
+      <input id="vo-type" placeholder="${t('Or type a command…')}" />
+      <button class="btn btn-primary btn-sm" id="vo-send">${t('Send')}</button>
     </div>
-    <button class="link-btn" id="vo-close" style="margin-top:12px;">Close</button>
+    <button class="link-btn" id="vo-close" style="margin-top:12px;">${t('Close')}</button>
   </div>`;
   m.classList.remove('hidden');
   $('#vo-close').onclick = closeVoiceModal;
@@ -1718,15 +1863,15 @@ async function handleVoiceText(text){
 
 function startListening(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR){ toast('Voice input needs Chrome on Android. You can still type a command.'); openVoiceModal(); $('#vo-status').textContent='Type a command below'; $('#vo-orb').classList.remove('listening'); return; }
-  if (!lsGet(LS.geminiKey,'')){ toast('Add a free Gemini API key in Settings first.'); nav('settings'); return; }
+  if (!SR){ toast(t('Voice input needs Chrome on Android. You can still type a command.')); openVoiceModal(); $('#vo-status').textContent=t('Type a command below'); $('#vo-orb').classList.remove('listening'); return; }
+  if (!lsGet(LS.geminiKey,'')){ toast(t('Add a free Gemini API key in Settings first.')); nav('settings'); return; }
   openVoiceModal();
   $('#mic-btn').classList.add('listening');
   const rec = new SR();
   rec.lang = state.settings.voiceLang || 'en-US';
   rec.interimResults = false; rec.maxAlternatives = 1;
   rec.onresult = (e) => { const text = e.results[0][0].transcript; handleVoiceText(text); };
-  rec.onerror = (e) => { $('#mic-btn').classList.remove('listening'); if ($('#vo-status')) $('#vo-status').textContent = 'Could not hear you — try typing instead'; };
+  rec.onerror = (e) => { $('#mic-btn').classList.remove('listening'); if ($('#vo-status')) $('#vo-status').textContent = t('Could not hear you — try typing instead'); };
   rec.onend = () => { $('#mic-btn').classList.remove('listening'); };
   rec.start();
 }
@@ -1735,7 +1880,7 @@ $('#mic-btn').addEventListener('click', startListening);
 /* ================= PIN LOCK ================= */
 function openPinSetupSheet(){
   let entry = '';
-  openSheet(`<h3>Set a 4-digit PIN</h3><div class="pin-dots" id="ps-dots"></div><div class="pin-pad" id="ps-pad"></div>`, (ov) => {
+  openSheet(`<h3>${t('Set a 4-digit PIN')}</h3><div class="pin-dots" id="ps-dots"></div><div class="pin-pad" id="ps-pad"></div>`, (ov) => {
     const dotsEl = $('#ps-dots', ov), padEl = $('#ps-pad', ov);
     const draw = () => { dotsEl.innerHTML = [0,1,2,3].map(i=>`<span class="pin-dot ${i<entry.length?'filled':''}"></span>`).join(''); };
     draw();
@@ -1747,7 +1892,7 @@ function openPinSetupSheet(){
         if (k==='⌫') entry = entry.slice(0,-1);
         else if (k && entry.length<4) entry += k;
         draw();
-        if (entry.length===4){ lsSet(LS.pin, entry); toast('PIN set.'); closeSheet(); render(); }
+        if (entry.length===4){ lsSet(LS.pin, entry); toast(t('PIN set.')); closeSheet(); render(); }
       };
       padEl.appendChild(b);
     });
@@ -1770,7 +1915,7 @@ function showLockScreen(){
       draw();
       if (entry.length===4){
         if (entry === lsGet(LS.pin,null)){ $('#lock-screen').classList.add('hidden'); $('#app').classList.remove('hidden'); }
-        else { toast('Wrong PIN.'); entry=''; draw(); }
+        else { toast(t('Wrong PIN.')); entry=''; draw(); }
       }
     };
     padEl.appendChild(b);
@@ -1802,8 +1947,7 @@ async function boot(){
   if (pin){ showLockScreen(); } else { $('#app').classList.remove('hidden'); }
 
   await loadAll();
-  const pill = $('#sync-pill'), label = $('#sync-label');
-  if (cloud){ pill.classList.add('cloud'); label.textContent = 'Cloud'; } else { label.textContent = 'Local'; }
+  renderTopbar();
   render();
 
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')){
