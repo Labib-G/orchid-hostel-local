@@ -1521,8 +1521,16 @@ function bindViewEvents(){
     }
     bindPendingAttButtons();
     $('#btn-scan-form')?.addEventListener('click', () => $('#scan-form-input')?.click());
-    $('#scan-form-input')?.addEventListener('change', (e) => {
+    $('#scan-form-input')?.addEventListener('change', async (e) => {
       const file = e.target.files[0]; if (!file) return;
+      // Automatically save the scanned admission form image to the Attachments list at the
+      // bottom of the form, so it's stored without an extra step.
+      try{
+        const att = await DB.uploadFile(file, state._openId || 'pending');
+        state._pendingAttachments = [...(state._pendingAttachments||[]), att];
+        const listEl = $('#rf-att-list');
+        if (listEl){ listEl.innerHTML = renderPendingAttachmentsList(); bindPendingAttButtons(); }
+      }catch(err){ toast(err.message || t('Could not save scanned form.')); }
       const reader = new FileReader();
       reader.onload = () => applyFormScan(reader.result);
       reader.readAsDataURL(file);
