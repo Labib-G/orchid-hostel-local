@@ -718,6 +718,7 @@ async function loadAll(){
     state.seats = await DB.listSeats();
   }
   await ensureSingleRooms();
+  await normalizeSeatLabels();
   await applyDefaultRents();
   await purgeExpiredTrash();
 }
@@ -1384,8 +1385,21 @@ async function applyDefaultRents(){
 async function addRoom(room, count, floor='', bedType=''){
   const existing = state.seats.filter(s=>s.room===room).length;
   for (let i=1;i<=count;i++){
-    const label = String(existing+i);
+    const label = String.fromCharCode(64 + existing + i);
     await DB.saveSeat({ id: `seat_${room}_${label}`.replace(/\s+/g,'_'), room, seatLabel: label, status:'empty', residentId:null, floor:floor||'', bedType:bedType||'' });
+  }
+}
+// One-time fix: rename any numeric seat labels (1,2,3) to letters (A,B,C).
+async function normalizeSeatLabels(){
+  if (!state.seats.some(s => /^\d+$/.test(s.seatLabel))) return;
+  const rooms = {};
+  state.seats.forEach(s => { (rooms[s.room] = rooms[s.room]||[]).push(s); });
+  for (const room of Object.keys(rooms)){
+    const seats = rooms[room].slice().sort((a,b)=>a.seatLabel.localeCompare(b.seatLabel,undefined,{numeric:true}));
+    for (let i=0;i<seats.length;i++){
+      const letter = String.fromCharCode(65+i);
+      if (seats[i].seatLabel !== letter){ seats[i].seatLabel = letter; await DB.saveSeat(seats[i]); }
+    }
   }
 }
 
