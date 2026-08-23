@@ -257,6 +257,12 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
   background:var(--card); font-size:14.5px; outline:none;
 }
 .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--orchid);}
+/* A select that shows a single seat statically: keeps the box & value, but is not
+   openable/interactive (no arrow, no dropdown). Used when a room has exactly one empty seat. */
+.static-select{
+  -webkit-appearance:none; appearance:none; background-image:none;
+  pointer-events:none; cursor:default; opacity:.92;
+}
 .field-row{display:flex; gap:10px;}
 .field-row .field{flex:1; min-width:0;}
 .help{font-size:11.5px; color:var(--ink-faint); margin-top:5px;}
@@ -1649,10 +1655,27 @@ function bindViewEvents(){
 }
 function populateSeatSelect(room, residentId, preselectLabel){
   const sel = $('#rf-seat'); if (!sel) return;
-  if (!room){ sel.innerHTML = '<option value="">'+t('— Select room first —')+'</option>'; sel.disabled = true; return; }
+  const field = sel.closest('.field');
+  const resetLabel = () => { if (field){ const lbl = field.querySelector('label'); if (lbl) lbl.textContent = t('Seat'); } };
+  sel.classList.remove('static-select');
+  sel.style.display=''; if (field) field.style.display='';
+  if (!room){
+    resetLabel();
+    sel.innerHTML = '<option value="">'+t('— Select room first —')+'</option>'; sel.disabled = true; return;
+  }
   const isAdd = !residentId;
-  // Add flow: show ONLY truly empty seats. Edit flow: empty seats + this resident's current seat.
-  const options = state.seats.filter(s=>s.room===room && (!s.residentId || (residentId && s.residentId===residentId)));
+  const emptySeats = state.seats.filter(s=>s.room===room && !s.residentId);
+  // When a room has only one empty seat, there's no choice to make: keep the box visible but
+  // static (disabled, arrow hidden) showing that single seat — instead of a dropdown.
+  if (isAdd && emptySeats.length===1){
+    const seat = emptySeats[0];
+    sel.innerHTML = `<option value="${esc(seat.seatLabel)}" selected>${esc(seat.seatLabel)}</option>`;
+    sel.value = seat.seatLabel; sel.disabled = true; sel.classList.add('static-select');
+    resetLabel();
+    return;
+  }
+  resetLabel();
+  const options = isAdd ? emptySeats : state.seats.filter(s=>s.room===room && (!s.residentId || s.residentId===residentId));
   if (options.length===0){
     sel.innerHTML = '<option value="">'+t('No empty seats in this room')+'</option>';
     sel.disabled = true; return;
