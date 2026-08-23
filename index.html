@@ -1633,7 +1633,7 @@ function populateSeatSelect(room, residentId, preselectLabel){
   sel.disabled = false;
   const sorted = avail.slice().sort((a,b)=>a.seatLabel.localeCompare(b.seatLabel,undefined,{numeric:true}));
   const autoLabel = preselectLabel || sorted.find(s=>!s.residentId)?.seatLabel || sorted[0]?.seatLabel || '';
-  sel.innerHTML = '<option value="">— No seat —</option>' + sorted.map(s=>
+  sel.innerHTML = sorted.map(s=>
     `<option value="${esc(s.seatLabel)}" ${s.seatLabel===autoLabel?'selected':''}>${esc(s.seatLabel)}${s.residentId?' (current)':''}</option>`
   ).join('');
 }
