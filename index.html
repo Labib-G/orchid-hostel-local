@@ -852,9 +852,9 @@ function renderDashboard(){
       `<div class="card" style="padding:4px 12px;">${dueList.slice(0,3).map(r=>residentRow(r)).join('')}</div>`}
 
     <div class="section-title"><h2>${t('Quick actions')}</h2></div>
-    <div class="btn-row" style="margin-top:0;">
-      <button class="btn btn-accent-orchid" data-nav="residentForm">＋ ${t('Add Resident')}</button>
-      <button class="btn btn-danger" data-nav="residents">🗑 ${t('Remove resident')}</button>
+    <div class="btn-row" style="margin-top:0; flex-direction:column;">
+      <button class="btn btn-accent-orchid" style="width:100%;" data-nav="residentForm">＋ ${t('Add Resident')}</button>
+      <button class="btn btn-danger" style="width:100%;" data-nav="residents">🗑 ${t('Remove resident')}</button>
     </div>
   `;
 }
