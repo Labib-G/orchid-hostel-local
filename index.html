@@ -867,16 +867,22 @@ function emptyState(icon, title, sub){
   return `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icons[icon]||icons.check}</svg><p>${esc(sub)}</p></div>`;
 }
 
-function residentRow(r){
+function residentRow(r, showRemove){
   const st = residentDueStatus(r.id);
   const seat = residentSeat(r.id);
+  const removeBtn = showRemove
+    ? `<button type="button" class="link-btn" data-remove-resident="${r.id}"
+        style="color:var(--rust); width:30px; height:30px; min-width:30px; border-radius:8px;
+               font-size:15px; padding:2px 4px; display:inline-flex; align-items:center; justify-content:center;"
+        title="${t('Remove')}">🗑</button>`
+    : '';
   return `<div class="list-row" data-open-resident="${r.id}" style="cursor:pointer;">
     <div class="avatar">${esc(initials(r.name))}</div>
     <div class="row-main">
       <div class="row-title">${esc(r.name)}</div>
       <div class="row-sub">${seat ? esc(seat.room)+' · '+t('Seat')+' '+esc(seat.seatLabel) : t('No seat assigned')}</div>
     </div>
-    <span class="badge ${st}">${st==='paid'?t('Paid'):st==='partial'?t('Partial'):t('Due')}</span>
+    <span class="badge ${st}">${st==='paid'?t('Paid'):st==='partial'?t('Partial'):t('Due')}</span>${removeBtn}
   </div>`;
 }
 
@@ -902,7 +908,7 @@ function renderResidents(){
     </div>
     ${q && list.length>0 ? `<div class="faint mono" style="font-size:11px; margin:-6px 0 10px;">${list.length} ${t(list.length===1?'match':'matches')} — ${t('room, name, or phone containing')} "${esc(state._residentSearch)}"</div>` : ''}
     ${list.length===0 ? emptyState('users', t('No residents yet'), t('Add your first resident to get started.')) :
-      `<div class="card" style="padding:4px 12px;">${list.map(r=>residentRow(r)).join('')}</div>`}
+      `<div class="card" style="padding:4px 12px;">${list.map(r=>residentRow(r, true)).join('')}</div>`}
     ${trashCount>0 ? `<div style="text-align:center; margin-top:16px;"><button class="link-btn" data-nav="trash">🗑 ${t('Trash')} (${trashCount})</button></div>` : ''}
   `;
 }
@@ -1494,6 +1500,13 @@ async function recordPayment(residentId, {month, amountDue, amountPaid, status})
 function bindViewEvents(){
   $$('[data-nav]').forEach(el => el.addEventListener('click', () => nav(el.dataset.nav, {id: el.dataset.id})));
   $$('[data-open-resident]').forEach(el => el.addEventListener('click', () => nav('residentDetail', {id: el.dataset.openResident})));
+  $$('[data-remove-resident]').forEach(el => el.addEventListener('click', async (e) => {
+    e.stopPropagation(); // don't open the resident detail
+    const id = el.dataset.removeResident;
+    await softDeleteResident(id);      // instant soft-delete (frees seat, moves to Trash)
+    toast(t('Moved to trash.'));
+    await refresh();                    // stays on / redirects to the Residents page
+  }));
   $$('[data-rfilter]').forEach(el => el.addEventListener('click', () => { state.residentFilter = el.dataset.rfilter; render(); }));
   $('#resident-search')?.addEventListener('input', (e) => { state._residentSearch = e.target.value; render(); });
   $$('[data-seat]').forEach(el => el.addEventListener('click', () => openSeatSheet(el.dataset.seat)));
