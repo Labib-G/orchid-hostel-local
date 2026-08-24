@@ -707,7 +707,8 @@ const DB = {
       throw new Error(`That file is too big (${Math.round(file.size/1024)}KB). Keep attachments under ${Math.round(maxBytes/1024)}KB — try a compressed photo instead.`);
     }
     const dataUrl = await new Promise((resolve,reject)=>{ const fr = new FileReader(); fr.onload=()=>resolve(fr.result); fr.onerror=reject; fr.readAsDataURL(file); });
-    return { id: uid('att'), name:file.name, url:dataUrl, uploadedAt: new Date().toISOString() };
+    // Bind the attachment to the resident profile explicitly so it is always linked back to the owner.
+    return { id: uid('att'), name:file.name, url:dataUrl, residentId: residentId || null, uploadedAt: new Date().toISOString() };
   }
 };
 
