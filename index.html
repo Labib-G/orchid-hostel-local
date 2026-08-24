@@ -1142,19 +1142,49 @@ function renderSeats(){
 
 /* ---------- rendering: dues ---------- */
 function renderDues(){
-  const mk = state._duesMonth || monthKey();
   const cur = state.settings.currency;
-  const monthPayments = state.payments.filter(p=>p.month===mk && visibleResidentIdSet().has(p.residentId));
+  const current = monthKey();
+  const activeResidents = visibleResidents().filter(r=>r.status!== 'left');
+  const visibleIds = visibleResidentIdSet();
+  // Outstanding money owed for a given month (from the payment entries that exist for that month).
+  const outstandingFor = (mk) => state.payments
+    .filter(p=>p.month===mk && visibleIds.has(p.residentId))
+    .reduce((s,p)=>s+Math.max(0,(p.amountDue||0)-(p.amountPaid||0)),0);
+  // Candidate months = months that have payment records (for visible residents), plus the current month.
+  const months = [...new Set(state.payments.filter(p=>visibleIds.has(p.residentId)).map(p=>p.month))];
+  if (!months.includes(current)) months.push(current);
+  months.sort((a,b)=> b.localeCompare(a)); // most recent first
+
+  // Pick the month to display first:
+  //  - most recent PREVIOUS month that has a due (outstanding > 0)  -> show that month's name
+  //  - otherwise the current month if it has a due                  -> show current month
+  //  - otherwise there are no dues at all                            -> show a tick + "No pending dues."
+  const prevWithDue = months.filter(m => m < current && outstandingFor(m) > 0);
+  let primary = prevWithDue.length ? prevWithDue[0] : (outstandingFor(current) > 0 ? current : null);
+  const noDues = !primary;
+  const mk = state._duesMonth || (noDues ? current : primary);
+
+  let html = `<div class="section-title"><h2>${t('Dues')}</h2>`;
+  if (!noDues){
+    html += `<input type="month" id="dues-month" value="${mk}" style="border:none; background:var(--paper-alt); border-radius:8px; padding:5px 8px; font-family:var(--font-mono); font-size:12px;" />`;
+  }
+  html += `</div>`;
+
+  if (noDues){
+    return html + `
+    <div class="card" style="padding:26px 12px; text-align:center;">
+      <div style="font-size:44px; color:var(--green); line-height:1;">✓</div>
+      <div style="font-size:16px; font-weight:600; margin-top:12px; color:var(--ink);">${t('No pending dues.')}</div>
+    </div>`;
+  }
+
+  const monthPayments = state.payments.filter(p=>p.month===mk && visibleIds.has(p.residentId));
   const collected = monthPayments.reduce((s,p)=>s+(p.amountPaid||0),0);
   const due = monthPayments.reduce((s,p)=>s+Math.max(0,(p.amountDue||0)-(p.amountPaid||0)),0);
   const generated = !!state.settings.lastGeneratedMonth && state.settings.lastGeneratedMonth >= mk;
-  const activeResidents = visibleResidents().filter(r=>r.status!=='left');
   const missing = activeResidents.filter(r=>!monthPayments.find(p=>p.residentId===r.id));
 
-  return `
-    <div class="section-title"><h2>${t('Dues')}</h2>
-      <input type="month" id="dues-month" value="${mk}" style="border:none; background:var(--paper-alt); border-radius:8px; padding:5px 8px; font-family:var(--font-mono); font-size:12px;" />
-    </div>
+  html += `
     <div class="stat-grid">
       <div class="stat-card"><div class="eyebrow">${t('Collected')}</div><div class="big-num" style="color:var(--green); font-size:26px;">${cur}${fmtMoney(collected)}</div></div>
       <div class="stat-card"><div class="eyebrow">${t('Outstanding')}</div><div class="big-num" style="color:var(--rust); font-size:26px;">${cur}${fmtMoney(due)}</div></div>
@@ -1176,6 +1206,7 @@ function renderDues(){
         </div>`;
       }).join('')}</div>`}
   `;
+  return html;
 }
 
 function renderEmptySeats(){
