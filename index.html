@@ -151,13 +151,14 @@ h1,h2,h3{font-family:var(--font-display);margin:0;font-weight:700;}
 .mic-btn{
   position:fixed; z-index:30; right:calc(50% - 240px + 18px); bottom:78px;
   width:58px;height:58px;border-radius:50%;border:none;
-  background:linear-gradient(45deg,var(--orchid),var(--orchid-deep));
-  color:#fff; box-shadow:0 10px 24px -8px rgba(4,120,87,.55);
+   background:linear-gradient(135deg,#043D2C,#0A5E45,#0E9F6E); background-size:200% 200%;
+   animation:orchidShift 5s ease-in-out infinite;
+   color:#fff; box-shadow:0 10px 24px -8px rgba(4,120,87,.55);
   display:flex;align-items:center;justify-content:center;
 }
 .mic-btn svg{width:24px;height:24px;}
 @media (max-width:520px){ .mic-btn{ right:20px; } }
-.mic-btn.listening{animation:pulse 1.4s ease-in-out infinite;}
+.mic-btn.listening{animation:orchidShift 5s ease-in-out infinite, pulse 1.4s ease-in-out infinite;}
 @keyframes pulse{
   0%{box-shadow:0 0 0 0 rgba(var(--orchid-rgb),.5),0 10px 24px -8px rgba(4,120,87,.55);}
   70%{box-shadow:0 0 0 16px rgba(var(--orchid-rgb),0),0 10px 24px -8px rgba(4,120,87,.55);}
