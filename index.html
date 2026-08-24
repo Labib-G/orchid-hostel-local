@@ -854,7 +854,7 @@ function renderDashboard(){
     <div class="section-title"><h2>${t('Quick actions')}</h2></div>
     <div class="btn-row" style="margin-top:0; flex-direction:column;">
       <button class="btn btn-accent-orchid" style="width:100%;" data-nav="residentForm">＋ ${t('Add Resident')}</button>
-      <button class="btn btn-danger" style="width:100%; background:#E53935; color:#fff;" data-nav="residents">🗑 ${t('Remove resident')}</button>
+      <button class="btn btn-danger" style="width:100%; background:#C0392B; color:#fff;" data-nav="residents">🗑 ${t('Remove resident')}</button>
     </div>
   `;
 }
@@ -873,7 +873,7 @@ function residentRow(r, showRemove){
   const seat = residentSeat(r.id);
   const removeBtn = showRemove
     ? `<button type="button" class="link-btn" data-remove-resident="${r.id}"
-        style="color:#E53935; width:30px; height:30px; min-width:30px; border-radius:8px;
+        style="color:#C0392B; width:30px; height:30px; min-width:30px; border-radius:8px;
                font-size:15px; padding:2px 4px; display:inline-flex; align-items:center; justify-content:center;"
             title="${t('Remove')}">🗑</button>`
     : '';
