@@ -877,7 +877,7 @@ function renderResidents(){
     ${q && list.length>0 ? `<div class="faint mono" style="font-size:11px; margin:-6px 0 10px;">${list.length} ${t(list.length===1?'match':'matches')} — ${t('room, name, or phone containing')} "${esc(state._residentSearch)}"</div>` : ''}
     ${list.length===0 ? emptyState('users', t('No residents yet'), t('Add your first resident to get started.')) :
       `<div class="card" style="padding:4px 12px;">${list.map(r=>residentRow(r, true)).join('')}</div>`}
-    ${trashCount>0 ? `<div style="text-align:center; margin-top:16px;"><button class="link-btn" data-nav="trash">🗑 ${t('Trash')} (${trashCount})</button></div>` : ''}
+    ${trashCount>0 ? `<div style="text-align:center; margin-top:16px;"><button class="btn btn-danger" style="background:#B30036; color:#fff;" data-nav="trash">🗑 ${t('Trash')} (${trashCount})</button></div>` : ''}
   `;
 }
 
@@ -1277,12 +1277,8 @@ function renderSettings(){
 
     <div class="section-title"><h2>${t('Data')}</h2></div>
     <div class="card">
-      <div class="btn-row" style="margin-top:0;">
-        <button class="btn btn-ghost btn-sm" id="btn-export">${t('Export backup (.json)')}</button>
-        <label class="btn btn-outline btn-sm" style="cursor:pointer;">${t('Import')}<input type="file" id="btn-import" accept="application/json" class="hidden" /></label>
-      </div>
       <div class="btn-row">
-        <button class="btn btn-outline btn-sm" data-nav="trash">🗑 ${t('Trash')} (${trashedResidents().length})</button>
+        <button class="btn btn-danger" style="background:#B30036; color:#fff;" data-nav="trash">🗑 ${t('Trash')} (${trashedResidents().length})</button>
       </div>
     </div>
   `;
@@ -1633,26 +1629,7 @@ function bindViewEvents(){
     if (!confirm(t('Disconnect cloud sync? This device will go back to local-only storage.'))) return;
     localStorage.removeItem(LS.fbConfig); location.reload();
   });
-  $('#btn-signout')?.addEventListener('click', async () => { await cloud.ax.signOut(cloud.auth); location.reload(); });
-
-  $('#btn-export')?.addEventListener('click', async () => {
-    const data = { residents: await DB.listResidents(), seats: await DB.listSeats(), payments: await DB.listPayments(), settings: await DB.settings(), exportedAt: new Date().toISOString() };
-    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'orchid-hostel-backup.json'; a.click();
-  });
-  $('#btn-import')?.addEventListener('change', async (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    const text = await file.text();
-    try{
-      const data = JSON.parse(text);
-      if (!confirm(t('Import will merge this backup into your current data. Continue?'))) return;
-      for (const r of data.residents||[]) await DB.saveResident(r);
-      for (const s of data.seats||[]) await DB.saveSeat(s);
-      for (const p of data.payments||[]) await DB.savePayment(p);
-      if (data.settings) await DB.saveSettings(data.settings);
-      toast(t('Import complete.')); await refresh();
-    }catch(err){ toast(t('Could not read that file.')); }
-  });
+   $('#btn-signout')?.addEventListener('click', async () => { await cloud.ax.signOut(cloud.auth); location.reload(); });
 }
 function populateSeatSelect(room, residentId, preselectLabel){
   const sel = $('#rf-seat'); if (!sel) return;
