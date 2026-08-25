@@ -1275,7 +1275,6 @@ function renderSettings(){
       ${cloud ? `<div class="btn-row"><button class="btn btn-outline btn-sm" id="btn-signout">${t('Sign out')} (${currentUser?.email||''})</button></div>` : ''}
      </div>
 
-    <div class="section-title"><h2>${t('Data')}</h2></div>
     <div class="card">
       <div class="btn-row">
         <button class="btn btn-danger" style="background:#B30036; color:#fff;" data-nav="trash">🗑 ${t('Trash')} (${trashedResidents().length})</button>
