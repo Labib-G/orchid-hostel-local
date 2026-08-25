@@ -815,7 +815,7 @@ function renderDashboard(){
     </div>
 
     <div class="section-title"><h2>${t('Residents with dues')}</h2>${dueList.length > 3 ? `<button class="link-btn" data-nav="dues">${t('See all')}</button>` : ''}</div>
-     ${dueList.length===0 ? emptyState('check', t('All caught up'), t('No pending dues.')) :
+     ${dueList.length===0 ? `<div style="padding:6px 4px 4px; color:var(--ink-soft); font-size:13px;">${t('No pending dues.')}</div>` :
       `<div class="card" style="padding:4px 12px;">${dueList.slice(0,3).map(r=>residentRow(r)).join('')}</div>`}
 
     <div class="section-title"><h2>${t('Quick actions')}</h2></div>
