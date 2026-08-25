@@ -559,7 +559,7 @@ const I18N = {
     'Form scanned — filling the form.':'ফর্ম স্ক্যান হয়েছে — ফর্ম পূরণ হচ্ছে।','Could not read the form.':'ফর্ম পড়া যায়নি।','No text found on the form.':'ফর্মে কোন তথ্য পাওয়া যায়নি।',
     'Pick a photo of the admission form':'ভর্তি ফর্মের ছবি বাছাই করুন','the AI reads it and fills the form automatically.':'AI ছবিটি পড়ে ফর্ম স্বয়ংক্রিয়ভাবে পূরণ করে।',
     'PDF, PNG, JPG or similar. Keep files modest in size — see Settings → Cloud sync for the limit.':'PDF, PNG, JPG বা অনুরূপ। ফাইলের আকার ছোট রাখুন — সীমার জন্য সেটিংস → ক্লাউড সিঙ্ক দেখুন।',    'incl. current':'বর্তমান সহ','current':'বর্তমান',
-    'No rooms yet':'এখনও কোন রুম নেই','Empty seats':'খালি আসন','All seats filled':'সব আসন পূর্ণ','Every seat has a resident.':'প্রতিটি আসনে একজন বাসিন্দা আছে।','All floors':'সব মংয়দশ','1st floor':'১ম মংয়দশ','2nd floor':'২য় মংয়দশ','Floor':'মংয়দশ','Single':'সিংগেল','Double':'ডাবল','Triple':'ট্রাইপল',
+    'No rooms yet':'এখনও কোন রুম নেই','Empty seats':'খালি আসন','All seats filled':'সব আসন পূর্ণ','Every seat has a resident.':'প্রতিটি আসনে একজন বাসিন্দা আছে।','1st floor':'১ম মংয়দশ','2nd floor':'২য় মংয়দশ','Floor':'মংয়দশ','Single':'সিংগেল','Double':'ডাবল','Triple':'ট্রাইপল',
   }
 };
 function t(s){ const l = (state && state.settings && state.settings.uiLang) || 'en'; return (I18N[l] && I18N[l][s]!=null) ? I18N[l][s] : s; }
@@ -696,7 +696,7 @@ const DB = {
 };
 
 /* ---------- app state ---------- */
-const state = { view:'dashboard', residents:[], seats:[], payments:[], settings:defaultSettings(), residentFilter:'all', seatFilter:'all', seatSortMode:'empty', _seatSearch:'', _floorFilter:null, _bedTypeFilter:null, _pendingAttachments:[] };
+const state = { view:'dashboard', residents:[], seats:[], payments:[], settings:defaultSettings(), residentFilter:'all', seatFilter:'all', seatSortMode:'empty', _seatSearch:'', _bedTypeFilter:null, _pendingAttachments:[] };
 const TRASH_DAYS = 40;
 
 async function loadAll(){
@@ -1069,67 +1069,58 @@ function renderPendingAttachmentsList(){
 
 /* ---------- rendering: seats ---------- */
 function renderSeats(){
-  const rooms = {};
-  state.seats.forEach(s => { (rooms[s.room] = rooms[s.room]||[]).push(s); });
-  let roomNames = Object.keys(rooms);
-  const mode = state.seatSortMode || 'empty';
-  const q = (state._seatSearch||'').toLowerCase().trim();
+    const rooms = {};
+    state.seats.forEach(s => { (rooms[s.room] = rooms[s.room]||[]).push(s); });
+    let roomNames = Object.keys(rooms);
+    const mode = state.seatSortMode || 'empty';
+    const q = (state._seatSearch||'').toLowerCase().trim();
 
-  // search: which seats match, and which rooms contain a match
-  const matchedSeatIds = new Set();
-  if (q){
-    for (const s of state.seats){
-      const res = s.residentId ? state.residents.find(r=>r.id===s.residentId) : null;
-      const roomMatch = s.room.toLowerCase().includes(q);
-      const personMatch = res && (res.name.toLowerCase().includes(q) || (res.phone||'').includes(q));
-      if (roomMatch || personMatch) matchedSeatIds.add(s.id);
+    // search: which seats match, and which rooms contain a match
+    const matchedSeatIds = new Set();
+    if (q){
+      for (const s of state.seats){
+        const res = s.residentId ? state.residents.find(r=>r.id===s.residentId) : null;
+        const roomMatch = s.room.toLowerCase().includes(q);
+        const personMatch = res && (res.name.toLowerCase().includes(q) || (res.phone||'').includes(q));
+        if (roomMatch || personMatch) matchedSeatIds.add(s.id);
+      }
+      roomNames = roomNames.filter(name => rooms[name].some(s=>matchedSeatIds.has(s.id)));
     }
-    roomNames = roomNames.filter(name => rooms[name].some(s=>matchedSeatIds.has(s.id)));
-  }
 
-   const emptyCount = name => rooms[name].filter(s=>!s.residentId).length;
-   const occCount = name => rooms[name].filter(s=>s.residentId).length;
-   const numCompare = (a,b) => a.localeCompare(b,undefined,{numeric:true});
-   // Floor sub-filter: only relevant in Floors mode; narrows rooms to a given floor.
-   if (mode==='floor' && state._floorFilter){
-     roomNames = roomNames.filter(name => rooms[name].some(s=> String(s.floor||'') === state._floorFilter));
-   }
-   if (mode==='bedType' && state._bedTypeFilter){
-     roomNames = roomNames.filter(name => rooms[name].some(s=> (s.bedType||'').toLowerCase() === state._bedTypeFilter));
-   }
-   if (mode==='occupied') roomNames.sort((a,b)=> occCount(b)-occCount(a) || numCompare(a,b));
-   else if (mode==='floor') roomNames.sort((a,b)=> (parseFloat(rooms[a][0].floor)||0)-(parseFloat(rooms[b][0].floor)||0) || emptyCount(b)-emptyCount(a) || numCompare(a,b));
-   else if (mode==='bedType') roomNames.sort((a,b)=> (rooms[a][0].bedType||'zzz').localeCompare(rooms[b][0].bedType||'zzz') || emptyCount(b)-emptyCount(a) || numCompare(a,b));
-   else roomNames.sort((a,b)=> emptyCount(b)-emptyCount(a) || numCompare(a,b));
+    const emptyCount = name => rooms[name].filter(s=>!s.residentId).length;
+    const occCount = name => rooms[name].filter(s=>s.residentId).length;
+    const numCompare = (a,b) => a.localeCompare(b,undefined,{numeric:true});
+    if (mode==='bedType' && state._bedTypeFilter){
+      roomNames = roomNames.filter(name => rooms[name].some(s=> (s.bedType||'').toLowerCase() === state._bedTypeFilter));
+    }
+    if (mode==='occupied') roomNames.sort((a,b)=> occCount(b)-occCount(a) || numCompare(a,b));
+    else if (mode==='bedType') roomNames.sort((a,b)=> (rooms[a][0].bedType||'zzz').localeCompare(rooms[b][0].bedType||'zzz') || emptyCount(b)-emptyCount(a) || numCompare(a,b));
+    else roomNames.sort((a,b)=> emptyCount(b)-emptyCount(a) || numCompare(a,b));
 
-  const tileSort = mode==='occupied'
-    ? (a,b)=> (b.residentId?1:0)-(a.residentId?1:0) || numCompare(a.seatLabel,b.seatLabel)
-    : (a,b)=> (a.residentId?1:0)-(b.residentId?1:0) || numCompare(a.seatLabel,b.seatLabel);
+    const tileSort = mode==='occupied'
+      ? (a,b)=> (b.residentId?1:0)-(a.residentId?1:0) || numCompare(a.seatLabel,b.seatLabel)
+      : (a,b)=> (a.residentId?1:0)-(b.residentId?1:0) || numCompare(a.seatLabel,b.seatLabel);
 
-  const sortChips = [
-    {id:'empty', label:'Empty first'}, {id:'occupied', label:'Occupied first'},
-    {id:'floor', label:'Floors'}, {id:'bedType', label:'Bed type'}
-  ];
+    const sortChips = [
+      {id:'empty', label:'Empty first'}, {id:'occupied', label:'Occupied first'},
+      {id:'bedType', label:'Bed type'}
+    ];
 
-  return `
-    <div class="section-title"><h2>${t('Seats')}</h2></div>
-    <div class="searchbar">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="seat-search" placeholder="${t('Search room no., name, or phone')}" value="${esc(state._seatSearch||'')}" />
-    </div>
-    <div class="chip-row">
-      ${sortChips.map(c=>`<button class="chip ${mode===c.id?'active':''}" data-seat-sort="${c.id}">${t(c.label)}</button>`).join('')}
-    </div>
-    ${mode==='floor' ? `<div class="chip-row" style="margin-top:8px;">
-      <button class="chip ${state._floorFilter==='1'?'active':''}" data-floor-filter="1">${t('1st floor')}</button>
-      <button class="chip ${state._floorFilter==='2'?'active':''}" data-floor-filter="2">${t('2nd floor')}</button>
-    </div>` : ''}
-    ${mode==='bedType' ? `<div class="chip-row" style="margin-top:8px;">
-      <button class="chip ${state._bedTypeFilter==='single'?'active':''}" data-bedtype-filter="single">${t('Single')}</button>
-      <button class="chip ${state._bedTypeFilter==='double'?'active':''}" data-bedtype-filter="double">${t('Double')}</button>
-      <button class="chip ${state._bedTypeFilter==='triple'?'active':''}" data-bedtype-filter="triple">${t('Triple')}</button>
-    </div>` : ''}
-    ${q && roomNames.length===0 ? emptyState('door', t('No matches'), t('Nothing found for that search.')) : ''}
+    return `
+      <div class="section-title"><h2>${t('Seats')}</h2></div>
+      <div class="searchbar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="seat-search" placeholder="${t('Search room no., name, or phone')}" value="${esc(state._seatSearch||'')}" />
+      </div>
+      <div class="chip-row">
+        ${sortChips.map(c=>`<button class="chip ${mode===c.id?'active':''}" data-seat-sort="${c.id}">${t(c.label)}</button>`).join('')}
+      </div>
+      ${mode==='bedType' ? `<div class="chip-row" style="margin-top:8px;">
+        <button class="chip ${state._bedTypeFilter==='single'?'active':''}" data-bedtype-filter="single">${t('Single')}</button>
+        <button class="chip ${state._bedTypeFilter==='double'?'active':''}" data-bedtype-filter="double">${t('Double')}</button>
+        <button class="chip ${state._bedTypeFilter==='triple'?'active':''}" data-bedtype-filter="triple">${t('Triple')}</button>
+      </div>` : ''}
+      ${q && roomNames.length===0 ? emptyState('door', t('No matches'), t('Nothing found for that search.')) : ''}
     ${roomNames.length===0 && !q ? emptyState('door', t('No rooms yet'), t('Rooms will appear here once added.')) :
       roomNames.map(room => {
         const meta = rooms[room][0];
@@ -1527,8 +1518,7 @@ function bindViewEvents(){
   $('#resident-search')?.addEventListener('input', (e) => { state._residentSearch = e.target.value; render(); });
   $$('[data-seat]').forEach(el => el.addEventListener('click', () => openSeatSheet(el.dataset.seat)));
   $('#seat-search')?.addEventListener('input', (e) => { state._seatSearch = e.target.value; render(); });
-  $$('[data-seat-sort]').forEach(el => el.addEventListener('click', () => { state.seatSortMode = el.dataset.seatSort; state._floorFilter = null; state._bedTypeFilter = null; render(); }));
-  $$('[data-floor-filter]').forEach(el => el.addEventListener('click', () => { state._floorFilter = el.dataset.floorFilter || null; render(); }));
+  $$('[data-seat-sort]').forEach(el => el.addEventListener('click', () => { state.seatSortMode = el.dataset.seatSort; state._bedTypeFilter = null; render(); }));
   $$('[data-bedtype-filter]').forEach(el => el.addEventListener('click', () => { state._bedTypeFilter = el.dataset.bedtypeFilter || null; render(); }));
 
   const rf = $('#resident-form');
