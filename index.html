@@ -1090,10 +1090,10 @@ function renderSeats(){
   const emptyCount = name => rooms[name].filter(s=>!s.residentId).length;
   const occCount = name => rooms[name].filter(s=>s.residentId).length;
   const numCompare = (a,b) => a.localeCompare(b,undefined,{numeric:true});
-  if (mode==='occupied') roomNames.sort((a,b)=> occCount(b)-occCount(a) || numCompare(a,b));
-  else if (mode==='floor') roomNames.sort((a,b)=> (parseFloat(rooms[a][0].floor)||0)-(parseFloat(rooms[b][0].floor)||0) || numCompare(a,b));
-  else if (mode==='bedType') roomNames.sort((a,b)=> (rooms[a][0].bedType||'zzz').localeCompare(rooms[b][0].bedType||'zzz') || numCompare(a,b));
-  else roomNames.sort((a,b)=> emptyCount(b)-emptyCount(a) || numCompare(a,b));
+   if (mode==='occupied') roomNames.sort((a,b)=> occCount(b)-occCount(a) || numCompare(a,b));
+   else if (mode==='floor') roomNames.sort((a,b)=> (parseFloat(rooms[a][0].floor)||0)-(parseFloat(rooms[b][0].floor)||0) || emptyCount(b)-emptyCount(a) || numCompare(a,b));
+   else if (mode==='bedType') roomNames.sort((a,b)=> (rooms[a][0].bedType||'zzz').localeCompare(rooms[b][0].bedType||'zzz') || emptyCount(b)-emptyCount(a) || numCompare(a,b));
+   else roomNames.sort((a,b)=> emptyCount(b)-emptyCount(a) || numCompare(a,b));
 
   const tileSort = mode==='occupied'
     ? (a,b)=> (b.residentId?1:0)-(a.residentId?1:0) || numCompare(a.seatLabel,b.seatLabel)
