@@ -1102,7 +1102,7 @@ function renderSeats(){
       : (a,b)=> (a.residentId?1:0)-(b.residentId?1:0) || numCompare(a.seatLabel,b.seatLabel);
 
     const sortChips = [
-      {id:'empty', label:'Empty first'}, {id:'occupied', label:'Occupied first'},
+      {id:'empty', label:'Empty'}, {id:'occupied', label:'Occupied'},
       {id:'bedType', label:'Bed type'}
     ];
 
