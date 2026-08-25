@@ -817,7 +817,7 @@ function renderDashboard(){
       </div>
     </div>
 
-    <div class="section-title"><h2>${t('Residents with dues')}</h2><button class="link-btn" data-nav="dues">${t('See all')}</button></div>
+    <div class="section-title"><h2>${t('Residents with dues')}</h2>${dueList.length > 3 ? `<button class="link-btn" data-nav="dues">${t('See all')}</button>` : ''}</div>
      ${dueList.length===0 ? `<div class="empty-state compact-due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><p>${t('No pending dues.')}</p></div>` :
       `<div class="card" style="padding:4px 12px;">${dueList.slice(0,3).map(r=>residentRow(r)).join('')}</div>`}
 
