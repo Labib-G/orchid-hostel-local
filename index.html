@@ -1118,7 +1118,6 @@ function renderSeats(){
       ${sortChips.map(c=>`<button class="chip ${mode===c.id?'active':''}" data-seat-sort="${c.id}">${t(c.label)}</button>`).join('')}
     </div>
     ${mode==='floor' ? `<div class="chip-row" style="margin-top:8px;">
-      <button class="chip ${state._floorFilter===null?'active':''}" data-floor-filter="">${t('All floors')}</button>
       <button class="chip ${state._floorFilter==='1'?'active':''}" data-floor-filter="1">${t('1st floor')}</button>
       <button class="chip ${state._floorFilter==='2'?'active':''}" data-floor-filter="2">${t('2nd floor')}</button>
     </div>` : ''}
