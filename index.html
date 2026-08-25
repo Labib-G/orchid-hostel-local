@@ -574,12 +574,24 @@ function setupLangSwitch(){
 
 /* ---------- cloud (Firebase) state, lazily initialised ---------- */
 const FB_VER = '12.17.1';
+// Default Firebase config for this hostel (orchid-hostel). Pre-filled so the app
+// connects to the shared backend automatically — no manual paste in Settings.
+// It can still be overridden from localStorage(LS.fbConfig) if you ever need to.
+const FB_DEFAULT_CONFIG = {
+  apiKey: "AIzaSyAggzdttmgNMEm4EyBrJRzt8cOXN3RyC_Q",
+  authDomain: "orchid-hostel.firebaseapp.com",
+  projectId: "orchid-hostel",
+  storageBucket: "orchid-hostel.firebasestorage.app",
+  messagingSenderId: "766843328746",
+  appId: "1:766843328746:web:b15e91a605669746f01f93",
+  measurementId: "G-NGBR3ZZ5VD"
+};
 let cloud = null;      // {app, db, auth, fx:{...}, ax:{...}} — no Firebase Storage (needs a billing card)
 let currentUser = null;
 let settingsCache = null;
 
 async function initCloud(){
-  const cfg = lsGet(LS.fbConfig, null);
+  const cfg = lsGet(LS.fbConfig, null) || FB_DEFAULT_CONFIG;
   if (!cfg){ cloud = null; return; }
   try{
     // Note: deliberately NOT using Firebase Storage here — as of Feb 2026 it requires a

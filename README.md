@@ -81,12 +81,20 @@ a free Firebase project. **This uses only Firestore (database) and Authenticatio
 Firebase Storage**, because Google now requires a billing card for Storage even on the free
 tier. Firestore + Auth need **no card at all**.
 
-1. Go to **[console.firebase.google.com](https://console.firebase.google.com)**, sign in.
-2. **Add project** → name it e.g. `orchid-hostel` → you can skip Google Analytics → Create.
-3. Left sidebar → **Build → Firestore Database → Create database**. Choose a region close to
-   you (e.g. `asia-south1` – Mumbai). Start in **production mode**.
-4. Go to the **Rules** tab of Firestore and replace the contents with:
-   ```
+For this build the **Firebase config is already embedded in `index.html`** (`FB_DEFAULT_CONFIG`),
+pointing at the shared `orchid-hostel` project that backs your customer site
+(`orchid-hostel.web.app`). So steps 1–6 below are already done for you — you only need to enable
+Auth/email-password and set the Firestore rules.
+
+1. Go to **[console.firebase.google.com](https://console.firebase.google.com)**, open the
+   `orchid-hostel` project.
+2. **Build → Authentication → Sign-in method → Email/Password → Enable**.
+3. **Build → Firestore Database** → if not present, create it (production mode, a region near
+   your hostel).
+4. **Build → Firestore Database → Rules** tab — paste the rules from step 5 below, then **Publish**.
+5. Firestore rules. Start with the open default so sign-in works, then harden to the admin UID
+   once the admin account exists (see step 7):
+   ```js
    rules_version = '2';
    service cloud.firestore {
      match /databases/{database}/documents {
@@ -96,20 +104,30 @@ tier. Firestore + Auth need **no card at all**.
      }
    }
    ```
-   Publish. (This means: only someone signed in to *your* app can read or write data.)
-5. Left sidebar → **Build → Authentication → Get started → Sign-in method → Email/Password
-   → Enable**.
-6. Left sidebar → **⚙ Project settings** (gear icon, top left) → scroll to **Your apps** →
-   click the **</> (Web)** icon → register an app (any nickname) → you'll see a `firebaseConfig`
-   object like:
-   ```js
-   { apiKey: "...", authDomain: "...", projectId: "...", storageBucket: "...", ... }
-   ```
-   Copy that whole `{ ... }` object.
-7. In the app, go to **Settings → Cloud sync**, paste it into the box, tap **Connect**.
-8. The app will ask you to sign in — tap **Create account**, set an email + password for
+   (only someone signed in to your app can read or write data.)
+6. The config is embedded, so there's nothing to paste in the app — just open it.
+7. The app will ask you to sign in — tap **Create account**, set an email + password for
    yourself (this is the one admin login for your hostel — don't share the sign-up screen
    publicly). From then on, sign in with that email/password on any device to see the same data.
+   After the account is created, get its UID from **Authentication → Users** and lock the rules down
+   so only that admin can edit rooms/residents while customers still read them:
+   ```js
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /{document=**} {
+         allow read: if true;                                  // customers see rooms
+         allow write: if request.auth.uid == 'PASTE_ADMIN_UID_HERE';
+       }
+     }
+   }
+   ```
+   The admin app reads/writes the collections `residents`, `seats`, `payments`, `meta/settings`
+   (`index.html` `DB` object) — make sure your customer site reads the same names.
+
+> **Admin-only note:** this PWA is the *staff/admin* tool — it has no customer-facing checkout,
+> payment, or booking UI. Guest booking is handled by your separate `orchid-hostel.web.app` site,
+> which reads the **same** Firestore data (rooms, availability, rent) via this shared project.
 
 Firestore's free quota (50K reads / 20K writes per day, 1GB storage) is far more than a single
 hostel will ever use, so this genuinely stays $0.
@@ -146,11 +164,11 @@ hostel will ever use, so this genuinely stays $0.
 - **Voice assistant** — the mic button (or the text box inside it) understands natural requests
   in English or Bengali and can look up, add, or update almost anything in the app — including
   deleting (to Trash) and creating rooms.
-- **Backup** — Settings → Export downloads a full JSON backup any time; Import restores/merges it.
+- **Sync** — Settings → Cloud sync connects this admin app to a Firebase project (Firestore
+  Auth), so rooms/residents/payments live in one database. Point it at your existing
+  `orchid-hostel.web.app` project and the customer site and admin app share data automatically.
 - **Dark mode by default** — a moon/sun toggle in the top bar (and a Light/Dark/System picker in
   Settings) if you'd rather switch it.
-- **Optional PIN lock** — Settings → App lock, a 4-digit PIN so a lost/borrowed phone doesn't
-  expose resident data.
 
 ### A note on attachments
 There's no separate file-storage service (again, to avoid needing a billing card), so uploaded
