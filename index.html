@@ -500,8 +500,9 @@ const I18N = {
     'Resident added.':'বাসিন্দা যোগ হয়েছে।','Resident updated.':'বাসিন্দা আপডেট হয়েছে।','Payment recorded.':'পেমেন্ট রেকর্ড হয়েছে।',
     'Seat assigned.':'সিট বরাদ্দ হয়েছে।','Saved.':'সংরক্ষিত।','PIN set.':'PIN সেট হয়েছে।','PIN removed.':'PIN সরানো হয়েছে।',
     'Settings saved.':'সেটিংস সংরক্ষিত।','Resident restored.':'বাসিন্দা ফিরিয়ে আনা হয়েছে।',
-    'Pin incorrect.':'PIN ভুল।',    'Enter PIN':'PIN লিখুন','Sign in':'সাইন ইন','Password':'পাসওয়ার্ড','Create account':'অ্যাকাউন্ট তৈরি করুন',
-    'Use offline mode on this device instead':'এর পরিবর্তে এই ডিভাইসে অফলাইন মোড ব্যবহার করুন',
+     'Pin incorrect.':'PIN ভুল।',    'Enter PIN':'PIN লিখুন','Sign in':'সাইন ইন','Password':'পাসওয়ার্ড','Create account':'অ্যাকাউন্ট তৈরি করুন',
+     'Please enter a valid email.':'একটি বৈধ ইমেইল লিখুন।','Password must be at least 6 characters.':'পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে।',
+     'Use offline mode on this device instead':'এর পরিবর্তে এই ডিভাইসে অফলাইন মোড ব্যবহার করুন',
     'Cloud sync is on for this hostel. Sign in with the admin account to continue.':'এই হোস্টেলের ক্লাউড সিঙ্ক চালু আছে। চালিয়ে যেতে অ্যাডমিন অ্যাকাউন্ট দিয়ে সাইন ইন করুন।','Unlock':'আনলক',
     'Listening...':'শুনছে...','Tap to talk':'কথা বলতে ট্যাপ করুন',
     'Listening…':'শুনছে…','Or type a command…':'অথবা একটি কমান্ড লিখুন…','Send':'পাঠান',    'Set a 4-digit PIN':'৪-সংখ্যার PIN সেট করুন','Could not hear you — try typing instead':'আপনার কথা শোনা যায়নি — টাইপ করে চেষ্টা করুন',
@@ -2001,12 +2002,21 @@ async function boot(){
     currentUser = await waitForAuth();
     if (!currentUser){
       $('#signin-screen').classList.remove('hidden');
+      const validateCreds = () => {
+        const err = $('#si-error'); err.textContent = '';
+        const em = $('#si-email').value.trim(); const pw = $('#si-pass').value;
+        if (!em || !em.includes('@')){ err.textContent = t('Please enter a valid email.'); return null; }
+        if (pw.length < 6){ err.textContent = t('Password must be at least 6 characters.'); return null; }
+        return { em, pw };
+      };
       $('#si-signin').onclick = async () => {
-        try{ await cloud.ax.signIn(cloud.auth, $('#si-email').value.trim(), $('#si-pass').value); location.reload(); }
+        const c = validateCreds(); if (!c) return;
+        try{ await cloud.ax.signIn(cloud.auth, c.em, c.pw); location.reload(); }
         catch(e){ $('#si-error').textContent = e.message; }
       };
       $('#si-create').onclick = async () => {
-        try{ await cloud.ax.signUp(cloud.auth, $('#si-email').value.trim(), $('#si-pass').value); location.reload(); }
+        const c = validateCreds(); if (!c) return;
+        try{ await cloud.ax.signUp(cloud.auth, c.em, c.pw); location.reload(); }
         catch(e){ $('#si-error').textContent = e.message; }
       };
       $('#si-use-local').onclick = () => { localStorage.removeItem(LS.fbConfig); location.reload(); };
