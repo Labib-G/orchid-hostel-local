@@ -3,7 +3,7 @@
 // Data (residents/payments/etc.) is handled separately by localStorage or Firebase,
 // not by this cache.
 
-const CACHE_NAME = "orchid-hostel-v1";
+const CACHE_NAME = "orchid-hostel-v2";
 const APP_SHELL = ["./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (event) => {

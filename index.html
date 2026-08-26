@@ -608,7 +608,7 @@ async function initCloud(){
       app,
       db: fsMod.getFirestore(app),
       auth: authMod.getAuth(app),
-      fx: { collection:fsMod.collection, doc:fsMod.doc, getDoc:fsMod.getDoc, getDocs:fsMod.getDocs, setDoc:fsMod.setDoc, deleteDoc:fsMod.deleteDoc },
+      fx: { collection:fsMod.collection, doc:fsMod.doc, getDoc:fsMod.getDoc, getDocs:fsMod.getDocs, setDoc:fsMod.setDoc, deleteDoc:fsMod.deleteDoc, writeBatch:fsMod.writeBatch },
       ax: { onAuthStateChanged:authMod.onAuthStateChanged, signIn:authMod.signInWithEmailAndPassword, signUp:authMod.createUserWithEmailAndPassword, signOut:authMod.signOut }
     };
   }catch(err){
@@ -652,6 +652,13 @@ const DB = {
     return s;
   },
   async saveSeats(arr){ for (const s of arr) await this.saveSeat(s); },
+  async saveSeatsBatch(arr){
+    if (!cloud){ for (const s of arr) await this.saveSeat(s); return arr; }
+    const batch = cloud.fx.writeBatch();
+    arr.forEach(s => { if (!s.id) s.id = uid('seat'); batch.set(cloud.fx.doc(cloud.db,'seats',s.id), s); });
+    await batch.commit();
+    return arr;
+  },
   async deleteSeat(id){
     if (cloud){ await cloud.fx.deleteDoc(cloud.fx.doc(cloud.db,'seats',id)); }
     else{ lsSet(LS.seats, lsGet(LS.seats,[]).filter(x=>x.id!==id)); }
@@ -1342,11 +1349,17 @@ function closeSheet(){ $('#sheet-overlay').classList.add('hidden'); $('#sheet-ov
 const DEFAULT_ROOM_SEATS = { 3:1, 6:1, 32:1, 33:1, 37:1, 38:1, 25:3, 42:3 };
 async function seedDefaultRooms(){
   if (state.seats.length) return;
+  const seats = [];
   for (let n=1; n<=42; n++){
     const count = DEFAULT_ROOM_SEATS[n] || 2;
     const bedType = count===1 ? 'single' : count===3 ? 'triple' : 'double';
-    await addRoom(String(n), count, '', bedType);
+    const room = String(n);
+    for (let i=1; i<=count; i++){
+      const label = String.fromCharCode(64 + i);  // A,B,C… (existing=0 on fresh seed)
+      seats.push({ id:`seat_${room}_${label}`.replace(/\s+/g,'_'), room, seatLabel:label, status:'empty', residentId:null, floor:'', bedType });
+    }
   }
+  await DB.saveSeatsBatch(seats);   // single Firestore batch commit instead of ~100 round-trips
 }
 async function ensureSingleRooms(){
   // For rooms meant to be single (37, 38), drop any EXTRA seats that are empty,
