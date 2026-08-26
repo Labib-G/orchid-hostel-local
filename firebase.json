@@ -1,0 +1,32 @@
+{
+  "hosting": {
+    "site": "orchid-admin",
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      "firebase-debug.log",
+      "deploy.ps1",
+      "deploy-firebase.ps1",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      { "source": "**", "destination": "/index.html" }
+    ],
+    "headers": [
+      {
+        "source": "index.html",
+        "headers": [ { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" } ]
+      },
+      {
+        "source": "sw.js",
+        "headers": [ { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" } ]
+      },
+      {
+        "source": "manifest.json",
+        "headers": [ { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" } ]
+      }
+    ]
+  }
+}

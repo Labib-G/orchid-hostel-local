@@ -2030,7 +2030,12 @@ async function boot(){
       $('#si-create').onclick = async () => {
         const c = validateCreds(); if (!c) return;
         try{ await cloud.ax.signUp(cloud.auth, c.em, c.pw); location.reload(); }
-        catch(e){ $('#si-error').textContent = e.message; }
+        catch(e){
+          if (e?.code === 'auth/email-already-in-use'){
+            try{ await cloud.ax.signIn(cloud.auth, c.em, c.pw); location.reload(); }
+            catch(e2){ $('#si-error').textContent = e2.message; }
+          } else { $('#si-error').textContent = e.message; }
+        }
       };
       $('#si-use-local').onclick = () => { localStorage.removeItem(LS.fbConfig); location.reload(); };
       return;
