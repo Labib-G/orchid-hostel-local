@@ -502,7 +502,7 @@ const I18N = {
     'Settings saved.':'সেটিংস সংরক্ষিত।','Resident restored.':'বাসিন্দা ফিরিয়ে আনা হয়েছে।',
      'Pin incorrect.':'PIN ভুল।',    'Enter PIN':'PIN লিখুন','Sign in':'সাইন ইন','Password':'পাসওয়ার্ড','Create account':'অ্যাকাউন্ট তৈরি করুন',
      'Please enter a valid email.':'একটি বৈধ ইমেইল লিখুন।','Password must be at least 6 characters.':'পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে।',
-     'Use offline mode on this device instead':'এর পরিবর্তে এই ডিভাইসে অফলাইন মোড ব্যবহার করুন',
+     'Use offline mode on this device instead':'এর পরিবর্তে এই ডিভাইসে অফলাইন মোড ব্যবহার করুন','Loading…':'লোড হচ্ছে…',
     'Cloud sync is on for this hostel. Sign in with the admin account to continue.':'এই হোস্টেলের ক্লাউড সিঙ্ক চালু আছে। চালিয়ে যেতে অ্যাডমিন অ্যাকাউন্ট দিয়ে সাইন ইন করুন।','Unlock':'আনলক',
     'Listening...':'শুনছে...','Tap to talk':'কথা বলতে ট্যাপ করুন',
     'Listening…':'শুনছে…','Or type a command…':'অথবা একটি কমান্ড লিখুন…','Send':'পাঠান',    'Set a 4-digit PIN':'৪-সংখ্যার PIN সেট করুন','Could not hear you — try typing instead':'আপনার কথা শোনা যায়নি — টাইপ করে চেষ্টা করুন',
@@ -2037,9 +2037,14 @@ async function boot(){
     }
   }
 
-  try{ await loadAll(); }catch(e){ console.error('loadAll failed', e); toast(t('Could not load data — check connection and Firestore rules.')); }
-  renderTopbar();
   $('#app').classList.remove('hidden');
+  renderTopbar();
+  $('#view-root').innerHTML = `<div style="padding:28px 4px; color:var(--ink-soft);">${t('Loading…')}</div>`;
+  try{ await loadAll(); }catch(e){
+    console.error('loadAll failed', e);
+    const msg = e?.message || String(e);
+    toast(t('Could not load data — check connection and Firestore rules.') + '\n' + msg, 12000);
+  }
   await render();
 
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')){
